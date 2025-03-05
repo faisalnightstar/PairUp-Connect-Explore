@@ -1,0 +1,33 @@
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+
+const app = express();
+
+app.use(
+    cors({
+        origin: process.env.CORS_ORIGIN,
+        credentials: true, //access-control-allow-credentials
+        methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"], // add here all http methods you use
+        allowedHeaders: ["Content-Type", "Authorization"], // add here all headers your
+    })
+);
+
+app.use(
+    express.json({
+        limit: "500kb",
+    })
+);
+app.use(express.urlencoded({ extended: true, limit: "500kb" })); //when fetching data from url
+app.use(express.static("public"));
+app.use(cookieParser());
+
+// routes import
+import userRouter from "./routes/user.routes.js";
+import tripRouter from "./routes/trip.routes.js";
+
+// routes declaration
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/users/trips", tripRouter);
+
+export { app };
