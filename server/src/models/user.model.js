@@ -76,14 +76,14 @@ const userSchema = new Schema(
                 },
                 {
                     validator: function (password) {
-                        return /^(?=.*[@$!%*?&])/.test(password);
+                        return /^(?=.*[@#$!%*?&])/.test(password);
                     },
                     message:
                         "Password must contain at least one special character (@$!%*?&)",
                 },
                 {
                     validator: function (password) {
-                        return /^[A-Za-z\d@$!%*?&]{8,15}$/.test(password);
+                        return /^[A-Za-z\d@#$!%*?&]{8,15}$/.test(password);
                     },
                     message:
                         "Password can only contain letters, numbers, and special characters (@$!%*?&)",

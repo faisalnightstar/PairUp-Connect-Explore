@@ -25,9 +25,11 @@ app.use(cookieParser());
 // routes import
 import userRouter from "./routes/user.routes.js";
 import tripRouter from "./routes/trip.routes.js";
+import errorHandler from "./utils/errorHandler.js";
 
 // routes declaration
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/users/trips", tripRouter);
+app.use(errorHandler);
 
 export { app };

@@ -42,7 +42,9 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, phone, username, password } = req.body;
-    console.log(fullName, email, username, phone, password);
+    console.log(
+        `registerUser: fullName, email, username, phone, password: ${fullName}, ${email}, ${username}, ${phone}, ${password}`
+    );
 
     // validate user details - not empty, valid email, password length
     if (
@@ -69,16 +71,7 @@ const registerUser = asyncHandler(async (req, res) => {
                 console.error(`Error deleting avatar: ${err}`); // Handle deletion errors
             }
         }
-        if (req.files?.coverImage && req.files.coverImage[0].path) {
-            try {
-                fs.unlinkSync(req.files.coverImage[0].path);
-                console.log(
-                    `Deleted cover image from: ${req.files.coverImage[0].path}`
-                );
-            } catch (err) {
-                console.error(`Error deleting cover image: ${err}`);
-            }
-        }
+
         throw new ApiError(401, "User with username or email already exist");
     }
 
@@ -97,7 +90,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     //upload image to cloudinary, get image url
     const avatar = await uploadOnCloudinary(avatarLocalPath);
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
     // if (!avatar) {
     //     throw new ApiError(401, "Avatar is required to upload on cloudinary");
     // }
@@ -107,7 +100,7 @@ const registerUser = asyncHandler(async (req, res) => {
         // create is methode and it takes object
         fullName,
         avatar: avatar?.url || "",
-        coverImage: coverImage?.url || "", // we not checking coverimage is upload successfully or not that why if (coverImage?) is present then take url. if not, then take empty string.
+        // we not checking avatar is upload successfully or not that why if (avatar?) is present then take url. if not, then take empty string.
         email,
         phone,
         password,
@@ -115,7 +108,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
     if (!user) {
         console.error("User not created");
-        throw new ApiError(401, "Something went wrong while registering user");
+        throw new ApiError(401, "Something went wrong before registering user");
     }
 
     // remove password and refresh token field from response
@@ -126,7 +119,7 @@ const registerUser = asyncHandler(async (req, res) => {
     if (!createdUser) {
         throw new ApiError(
             401,
-            "Something went wrong while registering the user"
+            "Something went wrong after registering the user"
         );
     }
 
@@ -143,7 +136,9 @@ const loginUser = asyncHandler(async (req, res) => {
     // getting data from req body which is frontend
     const { email, username, password } = req.body;
 
-    console.log(email, username, password);
+    console.log(
+        `email, username, password: ${email}, ${username}, ${password}`
+    );
     // check user is sending  username or email
     if (!(username || email)) {
         throw new ApiError(401, "username or email is required");
@@ -239,7 +234,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const IncomingRefreshToken = req.cookies.refreshToken;
 
     if (!IncomingRefreshToken) {
-        throw new ApiError(401, "Unauthorized request");
+        throw new ApiError(
+            401,
+            "Unauthorized request, refresh token not found in browser cookies"
+        );
     }
 
     try {
@@ -268,6 +266,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         const { accessToken, refreshToken } =
             await generateAccessTokenAndRefreshToken(user._id);
 
+        console.log(
+            `accessToken: ${accessToken} , refreshToken: ${refreshToken}`
+        );
         const options = {
             httpOnly: true,
             secure: true,
@@ -506,7 +507,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                 fullName: 1,
                 username: 1,
                 avatar: 1,
-                coverImage: 1,
+
                 subscribeCount: 1,
                 channelSubscribedToCount: 1,
                 isSubscribed: 1,
