@@ -1,7 +1,27 @@
+import envConfig from "../../../conf/envConfiq";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
+
+//Registration thunk: credentials { email, username, password }
+export const registerUser = createAsyncThunk(
+    "auth/registerUser",
+    async (credentials, { rejectWithValue }) => {
+        try {
+            const response = await axios.post(
+                `${envConfig.BaseUrl}/users/register`,
+                credentials
+                // {
+                //     headers: { "Content-Type": "multipart/form-data" },
+                // }
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
 
 // Login thunk: credentials { email, username, password }
 export const loginUser = createAsyncThunk(
@@ -10,7 +30,7 @@ export const loginUser = createAsyncThunk(
         try {
             //sending data in backend
             const response = await axios.post(
-                "http://localhost:8001/api/v1/users/login",
+                `${envConfig.BaseUrl}/users/login`,
                 credentials
             );
 
@@ -21,19 +41,17 @@ export const loginUser = createAsyncThunk(
     }
 );
 
-//Registration thunk: credentials { email, username, password }
-export const registerUser = createAsyncThunk(
-    "auth/registerUser",
-    async (credentials, { rejectWithValue }) => {
+export const getCurrentLoggedInUser = createAsyncThunk(
+    "auth/getCurrentLoggedInUser",
+    async (_, { rejectWithValue }) => {
         try {
-            const response = await axios.post(
-                "http://localhost:8001/api/v1/users/register",
-                credentials,
-                {
-                    headers: { "Content-Type": "multipart/form-data" },
-                }
+            // The backend endpoint is something like /api/v1/users/me
+            const response = await axios.get(
+                `${envConfig.BaseUrl}/users/current-user`
             );
-            return response.data;
+            // Assuming the response structure is:
+            // { statusCode: 200, data: { user: { ... } }, message: '...', success: true }
+            return response.data.data; // Returns an object like { user: { ... } }
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
@@ -45,9 +63,13 @@ export const refreshAccessToken = createAsyncThunk(
     "auth/refreshAccessToken",
     async (refreshToken, { rejectWithValue }) => {
         try {
-            const response = await axios.post("/refresh-accessToken", {
-                refreshToken,
-            });
+            const response = await axios.post(
+                `${envConfig.BaseUrl}/users/refresh-accessToken`,
+                {
+                    withCredentials: true,
+                    refreshToken,
+                }
+            );
             // Expect { accessToken } in response.data
             return response.data;
         } catch (error) {
@@ -61,7 +83,9 @@ export const logoutUser = createAsyncThunk(
     "auth/logoutUser",
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axios.post("/logout");
+            const response = await axios.post(
+                `${envConfig.BaseUrl}/users/logout`
+            );
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -77,21 +101,18 @@ const initialState = {
     loading: false,
     error: null,
     isAuthenticated: false,
+    initialized: false,
 };
-
-// features/auth/authSlice.js (continued)
-// const initialState = {
-//     user: null,
-//     accessToken: null,
-//     refreshToken: null,
-//     loading: false,
-//     error: null,
-//   };
 
 const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
+        login: (state, action) => {
+            state.status = true;
+            state.user = action.payload.user;
+        },
+
         // In addition to logout thunk, you can define a manual logout action
         clearAuthState(state) {
             state.user = null;
@@ -107,17 +128,39 @@ const authSlice = createSlice({
                 state.loading = true;
                 state.error = null;
             })
+
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.status = true;
-                // Assuming response.data structure: { user, accessToken, refreshToken }
-                state.user = action.payload.user;
-                state.accessToken = action.payload.accessToken;
-                state.refreshToken = action.payload.refreshToken;
+                state.isAuthenticated = true;
+                // Extracting nested user data from response
+                const { user } = action.payload.data;
+                state.user = user;
             })
+
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || "Login failed";
+            })
+
+            // --- Fetch Authenticated User ---
+            .addCase(getCurrentLoggedInUser.pending, (state) => {
+                state.loading = true;
+            })
+
+            .addCase(getCurrentLoggedInUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.status = true;
+                state.isAuthenticated = true;
+                state.initialized = true;
+                state.user = action.payload;
+            })
+            .addCase(getCurrentLoggedInUser.rejected, (state, action) => {
+                state.loading = false;
+                state.initialized = true;
+                state.isAuthenticated = false;
+
+                state.error = action.payload || "Failed to fetch user";
             })
 
             // --- Register User ---
@@ -129,7 +172,7 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.status = true;
                 // Optionally, auto-login the user after registration
-                state.user = action.payload.data;
+                state.user = action.payload;
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
@@ -149,9 +192,15 @@ const authSlice = createSlice({
                 state.user = null;
                 state.accessToken = null;
                 state.refreshToken = null;
+                state.status = false;
+
+                state.loading = false;
+                state.error = null;
+                state.isAuthenticated = false;
+                state.initialized = false;
             });
     },
 });
 
-export const { clearAuthState } = authSlice.actions;
+export const { clearAuthState, login } = authSlice.actions;
 export default authSlice.reducer;

@@ -37,7 +37,6 @@ const tripSchema = new mongoose.Schema(
         },
         itinerary: [
             {
-                day: String,
                 activity: String,
             },
         ],

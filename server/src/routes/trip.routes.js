@@ -15,7 +15,7 @@ const router = Router();
 router
     .route("/post-trip")
     .post(verifyJWT, upload.single("coverImage"), postTrip);
-router.route("/get-trip").get(getAllTrip);
+router.route("/all-trips").get(getAllTrip);
 router.route("/view-trip/:tripId").get(viewTripDetails);
 router.route("/join-trip/:tripId").post(verifyJWT, joinTrip);
 

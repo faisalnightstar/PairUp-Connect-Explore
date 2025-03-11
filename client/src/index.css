@@ -4,29 +4,29 @@
 @import "tailwindcss";
 
 body {
-  font-family: var(--font-poppins);
-  background-color: var(--color-background);
-  opacity: 1;
-  background: #F9FAFB;
+    font-family: var(--font-poppins);
+    background-color: var(--color-background);
+    opacity: 1;
+    background: #F9FAFB;
 }
 :root {
-  --font-poppins: Poppins, sans-serif;
-  --font-roboto: Roboto, sans-serif;
-  --color-button-color: #F79489; 
-  --color-background: #F9FAFB;
+    --font-poppins: Poppins, sans-serif;
+    --font-roboto: Roboto, sans-serif;
+    --color-button-color: #F79489; 
+    --color-background: #F9FAFB;
 }
 
 
 
 @theme {
-  --font-poppins: Poppins, sans-serif;
-  --font-roboto: Roboto, sans-serif;
-  --color-button-color: #F79489;
-  --color-button-color-hover: #F8AFA6;
-  --color-background: #F9FAFB;
-  --color-profile-details: #4B5563;
-  --color-rating-star: #FACC15;
-  --color-paragraph-color: #6B7280;
-  --color-heading-color: #111827;
-  --color-btn-bg-color: #FADCD9;
+    --font-poppins: Poppins, sans-serif;
+    --font-roboto: Roboto, sans-serif;
+    --color-button-color: #F79489;
+    --color-button-color-hover: #F8AFA6;
+    --color-background: #F9FAFB;
+    --color-profile-details: #4B5563;
+    --color-rating-star: #FACC15;
+    --color-paragraph-color: #6B7280;
+    --color-heading-color: #111827;
+    --color-btn-bg-color: #FADCD9;
 }

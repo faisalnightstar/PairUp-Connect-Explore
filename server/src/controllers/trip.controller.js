@@ -44,14 +44,7 @@ const postTrip = asyncHandler(async (req, res) => {
             throw new ApiError(400, "All fields are required to post a trip");
         }
 
-        let coverImageLocalPath;
-        if (
-            req.files &&
-            Array.isArray(req.files?.coverImage) &&
-            req.files.coverImage?.length > 0
-        ) {
-            coverImageLocalPath = req.files?.coverImage[0].path;
-        }
+        const coverImageLocalPath = req.file?.path;
 
         console.log(`coverImageLocalPath: ${coverImageLocalPath}`);
 
@@ -81,6 +74,11 @@ const postTrip = asyncHandler(async (req, res) => {
         });
 
         //console.log("posted trip sucessfully: ", trip);
+        if (!trip) {
+            console.error("Error in postTrip:", error);
+            fs.unlinkSync(coverImageLocalPath);
+            throw new ApiError(500, "Something went wrong while posting trip");
+        }
 
         return res
             .status(201)
@@ -95,7 +93,7 @@ const postTrip = asyncHandler(async (req, res) => {
 const getAllTrip = asyncHandler(async (req, res) => {
     try {
         const trip = await Trip.find(req.trip);
-        //console.log("All trips: ", trip);
+        console.log("All trips: ", trip);
         if (!trip) {
             console.error("Error in getTrip:", error);
             throw new ApiError(404, "Trips not found");

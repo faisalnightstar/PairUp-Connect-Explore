@@ -33,7 +33,7 @@ const AuthPage = () => {
                     <div className="relative w-full h-full">
                         {/* Animated Background Circle */}
                         <div
-                            className={`absolute transition-all duration-[1800ms] ease-in-out z-10 left-[-250%] w-[300%] h-full bg-blue-500 rounded-[150px] ${
+                            className={`absolute transition-all duration-[1000ms] ease-in-out z-10 left-[-250%] w-[300%] h-full bg-blue-500 rounded-[150px] ${
                                 active ? "left-[50%]" : ""
                             }`}
                         ></div>
