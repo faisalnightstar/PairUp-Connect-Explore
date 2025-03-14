@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Trip } from "../models/trip.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { tripUploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 import fs from "fs";
@@ -55,7 +56,7 @@ const postTrip = asyncHandler(async (req, res) => {
             throw new ApiError(401, "Image is required to upload on LocalPath");
         }
 
-        const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+        const coverImage = await tripUploadOnCloudinary(coverImageLocalPath);
 
         //console.log(`coverImage: ${coverImage} coverImage.url: ${coverImage.url}`);
 
@@ -70,7 +71,9 @@ const postTrip = asyncHandler(async (req, res) => {
             budget,
             description,
             itinerary: JSON.parse(itinerary), // Convert itinerary JSON string to object
-            coverImage: coverImage?.url || "",
+            coverImage:
+                coverImage?.url ||
+                "https://res.cloudinary.com/pairup-connect/image/upload/f_auto,q_auto/No_image_available_afsl0y",
         });
 
         //console.log("posted trip sucessfully: ", trip);
@@ -93,7 +96,7 @@ const postTrip = asyncHandler(async (req, res) => {
 const getAllTrip = asyncHandler(async (req, res) => {
     try {
         const trip = await Trip.find(req.trip);
-        console.log("All trips: ", trip);
+        //console.log("All trips: ", trip);
         if (!trip) {
             console.error("Error in getTrip:", error);
             throw new ApiError(404, "Trips not found");
@@ -101,7 +104,7 @@ const getAllTrip = asyncHandler(async (req, res) => {
 
         return res
             .status(200)
-            .json(new ApiResponse(200, trip, "Trips fetched successfully"));
+            .json(new ApiResponse(201, trip, "Trips fetched successfully"));
     } catch (error) {
         console.error("Error in getTrip:", error);
         throw new ApiError(501, "Something went wrong while fetching trips");
@@ -113,7 +116,7 @@ const viewTripDetails = asyncHandler(async (req, res) => {
     try {
         const { tripId } = req.params;
 
-        console.log("tripId: ", tripId);
+        console.log("tripId for getting trip page details: ", tripId);
 
         const trips = await Trip.aggregate([
             { $match: { _id: new mongoose.Types.ObjectId(tripId) } },
@@ -181,7 +184,7 @@ const viewTripDetails = asyncHandler(async (req, res) => {
 
         return res
             .status(200)
-            .json(new ApiResponse(200, trips[0], "Trips fetched successfully"));
+            .json(new ApiResponse(201, trips[0], "Trips fetched successfully"));
     } catch (error) {
         console.error("Error in getTrips:", error);
         throw new ApiError(500, "Something went wrong while fetching trips");

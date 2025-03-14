@@ -1,13 +1,14 @@
+import "../axiosConfig.js";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Provider, useSelector, useDispatch } from "react-redux";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 import store from "./store/store.js";
 import "./index.css";
 import App from "./App.jsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import {
-    AuthPage,
     Discover,
     Home,
     LoginPage,
@@ -16,6 +17,10 @@ import {
     RegisterPage,
     TripForm,
     UserProfile,
+    UpdateProfilePicture,
+    GetStarted,
+    EditProfile,
+    ViewPostDetails,
 } from "./pages/index.js";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
@@ -27,6 +32,10 @@ const router = createBrowserRouter([
             {
                 path: "/",
                 element: <Home />,
+            },
+            {
+                path: "/getstarted",
+                element: <GetStarted />,
             },
             {
                 path: "/register",
@@ -50,6 +59,10 @@ const router = createBrowserRouter([
                 ),
             },
             {
+                path: "/view-post-details/:tripId",
+                element: <ViewPostDetails />,
+            },
+            {
                 path: "/msg",
 
                 element: (
@@ -67,6 +80,24 @@ const router = createBrowserRouter([
                     </ProtectedRoute>
                 ),
             },
+            {
+                path: "/update-profile-picture",
+
+                element: (
+                    <ProtectedRoute>
+                        <UpdateProfilePicture />,
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: "/edit-profile",
+
+                element: (
+                    <ProtectedRoute>
+                        <EditProfile />,
+                    </ProtectedRoute>
+                ),
+            },
         ],
     },
 ]);
@@ -74,7 +105,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")).render(
     <StrictMode>
         <Provider store={store}>
+            {/* <PersistGate loading={null} persistor={persistor}> */}
             <RouterProvider router={router} />
+            {/* </PersistGate> */}
         </Provider>
     </StrictMode>
 );

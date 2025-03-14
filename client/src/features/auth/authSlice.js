@@ -1,8 +1,8 @@
+import axios from "../../../axiosConfig.js";
 import envConfig from "../../../conf/envConfiq";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
 
-axios.defaults.withCredentials = true;
+//axios.defaults.withCredentials = true;
 
 //Registration thunk: credentials { email, username, password }
 export const registerUser = createAsyncThunk(
@@ -49,8 +49,7 @@ export const getCurrentLoggedInUser = createAsyncThunk(
             const response = await axios.get(
                 `${envConfig.BaseUrl}/users/current-user`
             );
-            // Assuming the response structure is:
-            // { statusCode: 200, data: { user: { ... } }, message: '...', success: true }
+
             return response.data.data; // Returns an object like { user: { ... } }
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -61,19 +60,23 @@ export const getCurrentLoggedInUser = createAsyncThunk(
 // Refresh token thunk: expects the refresh token value
 export const refreshAccessToken = createAsyncThunk(
     "auth/refreshAccessToken",
-    async (refreshToken, { rejectWithValue }) => {
+    async (_, { rejectWithValue }) => {
         try {
+            console.log("Refreshing aceess token...");
             const response = await axios.post(
                 `${envConfig.BaseUrl}/users/refresh-accessToken`,
                 {
                     withCredentials: true,
-                    refreshToken,
                 }
             );
-            // Expect { accessToken } in response.data
-            return response.data;
+            console.log("Refresh Token Response:", response);
+            return response;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            if (error.response) {
+                return rejectWithValue(error.response.data);
+            } else {
+                return rejectWithValue(error.message);
+            }
         }
     }
 );
@@ -85,6 +88,39 @@ export const logoutUser = createAsyncThunk(
         try {
             const response = await axios.post(
                 `${envConfig.BaseUrl}/users/logout`
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+//update profile picture
+export const updateUserAvatar = createAsyncThunk(
+    "auth/updateUserAvatar",
+    async (credentials, { rejectWithValue }) => {
+        try {
+            const response = await axios.patch(
+                `${envConfig.BaseUrl}/users/update-avatar`,
+                credentials
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+//update profile details
+
+export const updateProfileDetails = createAsyncThunk(
+    "auth/updateProfileDetails",
+    async (data, { rejectWithValue }) => {
+        try {
+            const response = await axios.patch(
+                `${envConfig.BaseUrl}/users/update-account`,
+                data
             );
             return response.data;
         } catch (error) {
@@ -119,6 +155,9 @@ const authSlice = createSlice({
             state.accessToken = null;
             state.refreshToken = null;
             state.error = null;
+        },
+        setAuthenticated(state, action) {
+            state.isAuthenticated = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -180,10 +219,19 @@ const authSlice = createSlice({
             })
 
             // --- Refresh Access Token ---
+            .addCase(refreshAccessToken.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
             .addCase(refreshAccessToken.fulfilled, (state, action) => {
-                state.accessToken = action.payload.accessToken;
+                state.loading = false;
+                state.status = true;
+                state.isAuthenticated = true;
+                state.initialized = true;
             })
             .addCase(refreshAccessToken.rejected, (state, action) => {
+                state.loading = false;
+                state.isAuthenticated = false;
                 state.error = action.payload || "Token refresh failed";
             })
 
@@ -198,9 +246,39 @@ const authSlice = createSlice({
                 state.error = null;
                 state.isAuthenticated = false;
                 state.initialized = false;
+            })
+            .addCase(updateUserAvatar.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateUserAvatar.fulfilled, (state, action) => {
+                state.loading = false;
+                state.status = true;
+                state.user = action.payload;
+            })
+            .addCase(updateUserAvatar.rejected, (state, action) => {
+                state.loading = false;
+                state.error =
+                    action.payload ||
+                    "Something went wrong while updating avatar";
+            })
+            .addCase(updateProfileDetails.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateProfileDetails.fulfilled, (state, action) => {
+                state.loading = false;
+                state.status = true;
+                state.user = action.payload;
+            })
+            .addCase(updateProfileDetails.rejected, (state, action) => {
+                state.loading = false;
+                state.error =
+                    action.payload ||
+                    "Something went wrong while updating profile";
             });
     },
 });
 
-export const { clearAuthState, login } = authSlice.actions;
+export const { clearAuthState, login, setAuthenticated } = authSlice.actions;
 export default authSlice.reducer;

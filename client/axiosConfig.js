@@ -6,43 +6,47 @@ import {
     clearAuthState,
 } from "./src/features/auth/authSlice.js";
 
-axios.defaults.withCredentials = true; // ensure cookies are sent if needed
+axios.defaults.withCredentials = true;
 
-axios.interceptors.response.use(
+// Ensure cookies are sent with every request
+const axiosInstance = axios.create({
+    withCredentials: true,
+});
+
+// Add a response interceptor
+axiosInstance.interceptors.response.use(
     (response) => response,
+
     async (error) => {
+        console.error("Error while fetching data", error);
         const originalRequest = error.config;
 
-        // If error status is 401 and we haven't retried yet
         if (
             error.response &&
             error.response.status === 401 &&
+            error.response.data.message === "jwt expired" &&
             !originalRequest._retry
         ) {
             originalRequest._retry = true;
+            console.log("Refreshing access token...");
+
             try {
-                const state = store.getState();
-                const refreshToken = state.auth.refreshToken;
-                if (!refreshToken)
-                    throw new Error("No refresh token available");
-                const result = await store.dispatch(
-                    refreshAccessToken(refreshToken)
-                );
-                if (result.error) throw new Error("Refresh token expired");
-                // Set the new token in the default headers and retry the request
-                axios.defaults.headers.common["Authorization"] =
-                    `Bearer ${result.payload.accessToken}`;
-                originalRequest.headers["Authorization"] =
-                    `Bearer ${result.payload.accessToken}`;
-                return axios(originalRequest);
+                // Dispatch the refreshAccessToken thunk
+                const resultAction = await store.dispatch(refreshAccessToken());
+
+                if (refreshAccessToken.fulfilled.match(resultAction)) {
+                    console.log("Access token refreshed successfully");
+                    return axiosInstance(originalRequest); // Retry the original request
+                }
             } catch (err) {
-                // Clear auth state or redirect to login if refresh fails
-                store.dispatch(clearAuthState());
+                console.error("Failed to refresh access token", err);
+                //       store.dispatch(clearAuthState()); // Log out user if refresh fails
                 return Promise.reject(err);
             }
         }
+
         return Promise.reject(error);
     }
 );
 
-export default axios;
+export default axiosInstance;

@@ -1,7 +1,11 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+    deleteOnCloudinary,
+    extractPublicId,
+    uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import fs from "fs";
 import jwt from "jsonwebtoken";
@@ -43,12 +47,12 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, phone, username, password } = req.body;
     console.log(
-        `registerUser: fullName, email, username, phone, password: ${fullName}, ${email}, ${username}, ${phone}, ${password}`
+        `registerUser:- \n fullName: ${fullName}, email: ${email}, username: ${username}, phone: ${phone}, password: ${password}`
     );
 
     // validate user details - not empty, valid email, password length
     if (
-        [fullName, email, username, password].some(
+        [fullName, email, phone, username, password].some(
             (field) => field?.trim() === ""
         )
     ) {
@@ -58,11 +62,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // check if user already exists in the database: username, email
     const existedUser = await User.findOne({
-        $or: [{ username }, { email }],
+        $or: [{ username }, { email }, { phone }],
     });
 
+    console.log("existedUser: ", existedUser);
+
     if (existedUser) {
-        // **Crucial: Delete files from local storage if user exists**
+        // Delete files from local storage if user exists**
         if (req.files?.avatar && req.files.avatar[0].path) {
             try {
                 fs.unlinkSync(req.files.avatar[0].path);
@@ -72,7 +78,10 @@ const registerUser = asyncHandler(async (req, res) => {
             }
         }
 
-        throw new ApiError(401, "User with username or email already exist");
+        throw new ApiError(
+            401,
+            "User with username, phone or email already exist"
+        );
     }
 
     let avatarLocalPath;
@@ -95,40 +104,52 @@ const registerUser = asyncHandler(async (req, res) => {
     //     throw new ApiError(401, "Avatar is required to upload on cloudinary");
     // }
 
-    // create user object - create user in the database
-    const user = await User.create({
-        // create is methode and it takes object
-        fullName,
-        avatar: avatar?.url || "",
-        // we not checking avatar is upload successfully or not that why if (avatar?) is present then take url. if not, then take empty string.
-        email,
-        phone,
-        password,
-        username: username.toLowerCase(),
-    });
-    if (!user) {
-        console.error("User not created");
-        throw new ApiError(401, "Something went wrong before registering user");
-    }
+    try {
+        // create user object - create user in the database
+        const user = await User.create({
+            // create is methode and it takes object
+            fullName,
+            avatar: avatar?.url || "",
+            // we not checking avatar is upload successfully or not that why if (avatar?) is present then take url. if not, then take empty string.
+            email,
+            phone,
+            password,
+            username: username.toLowerCase(),
+        });
+        if (!user) {
+            console.error("User not created");
+            throw new ApiError(
+                401,
+                "Something went wrong before registering user"
+            );
+        }
 
-    // remove password and refresh token field from response
-    const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken" // select methode me jo field nhi chahiye response me usko - sign laga kr likh do.
-    );
-    // now, checking user created or not
-    if (!createdUser) {
-        throw new ApiError(
-            401,
-            "Something went wrong after registering the user"
+        // remove password and refresh token field from response
+        const createdUser = await User.findById(user._id).select(
+            "-password -refreshToken" // select methode me jo field nhi chahiye response me usko - sign laga kr likh do.
         );
-    }
+        // now, checking user created or not
+        if (!createdUser) {
+            throw new ApiError(
+                401,
+                "Something went wrong after registering the user"
+            );
+        }
 
-    // returning res to frontend
-    return res
-        .status(201)
-        .json(
-            new ApiResponse(200, createdUser, "User registered successfully")
-        );
+        // returning res to frontend
+        return res
+            .status(201)
+            .json(
+                new ApiResponse(
+                    201,
+                    createdUser,
+                    "User registered successfully"
+                )
+            );
+    } catch (error) {
+        console.error("Error in registerUser:", error);
+        throw new ApiError(401, "Something went wrong while registering user");
+    }
 });
 
 // LOGIN USER CONTROLLER
@@ -186,7 +207,7 @@ const loginUser = asyncHandler(async (req, res) => {
         .cookie("refreshToken", refreshToken, options)
         .json(
             new ApiResponse(
-                200,
+                201,
                 {
                     user: loggedInUser,
                     accessToken,
@@ -233,6 +254,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const IncomingRefreshToken = req.cookies.refreshToken;
 
+    console.log("IncomingRefreshToken: ", IncomingRefreshToken);
+
     if (!IncomingRefreshToken) {
         throw new ApiError(
             401,
@@ -275,16 +298,16 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         };
 
         return res
-            .status(200)
+            .status(201)
             .cookie("accessToken", accessToken, options)
             .cookie("refreshToken", refreshToken, options)
             .json(
-                new ApiResponse(200, {}, "Access token refreshed successfully")
+                new ApiResponse(201, {}, "Access token refreshed successfully")
             );
     } catch (error) {
         console.error("Error in refreshAccessToken:", error);
         throw new ApiError(
-            400,
+            401,
             error?.message || "Failed to refresh access token"
         );
     }
@@ -322,10 +345,10 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-    //console.log(req.user.refreshToken);
+    //console.log("refreshToken to get current user: ", req.cookies.refreshToken);
     return res
         .status(200)
-        .json(new ApiResponse(200, req.user, "Current User found"));
+        .json(new ApiResponse(201, req.user, "Current User found"));
 });
 
 const findUserByUsername = async (req, res) => {
@@ -357,9 +380,19 @@ const findUserByUsername = async (req, res) => {
 };
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-    const { fullName, username, email, phone } = req.body;
+    const {
+        fullName,
+        username,
+        email,
+        phone,
+        languages,
+        travelPreference,
+        address,
+    } = req.body;
 
-    //console.log(fullName, username, email, phone);
+    console.log(
+        `fullName: ${fullName}, username: ${username}, email: ${email}, phone: ${phone}, languages: ${languages}, travelPreference: ${travelPreference},address: ${address}`
+    );
     if (!fullName || !username || !email || !phone) {
         throw new ApiError(
             400,
@@ -374,6 +407,9 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
                 username,
                 email,
                 phone,
+                languages,
+                travelPreference,
+                address,
             },
         },
         {
@@ -384,7 +420,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            new ApiResponse(200, user, "Account details updated successfully")
+            new ApiResponse(201, user, "Account details updated successfully")
         );
 });
 
@@ -397,6 +433,21 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Avatar file is required to be file uploaded");
     }
 
+    // Fetch the current user from the database
+    const user = await User.findById(req.user?._id);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    // If user already has an avatar, delete it from Cloudinary
+    if (user.avatar) {
+        const publicId = extractPublicId(user.avatar);
+        if (publicId) {
+            console.log("Deleting old avatar with publicId:", publicId);
+            await deleteOnCloudinary(publicId);
+        }
+    }
+
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     console.log("avatar: ", avatar);
 
@@ -404,7 +455,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         console.error("Something went wrong while uploading avatar");
         throw new ApiError(400, "Something went wrong while uploading avatar");
     }
-    const user = await User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
@@ -418,7 +469,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, user, "Avatar updated successfully"));
+        .json(new ApiResponse(201, updatedUser, "Avatar updated successfully"));
 });
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {

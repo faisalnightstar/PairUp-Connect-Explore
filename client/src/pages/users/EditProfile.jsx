@@ -1,45 +1,86 @@
-import React from "react";
-import { useState } from "react";
-import axios from "axios";
+import React, { useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { CheckBox, Input } from "../../components";
+import { useForm, FormProvider } from "react-hook-form";
+import { useSelector, useDispatch } from "react-redux";
+import { updateProfileDetails } from "../../features/auth/authSlice";
 
 const EditProfile = () => {
-    const location = useLocation();
-    const { user } = location.state || {}; // Get passed trip details
-
-    console.log("edit user: ", user);
-    const [formData, setFormData] = useState({
-        username: "",
-        fullName: "",
-        email: "",
-        phone: "",
-    });
-    const getValues = (e) => {
-        let inputVal = e.target.value;
-        let oldData = { ...formData };
-        setFormData({ ...oldData, [e.target.name]: inputVal });
-    };
-
     const navigate = useNavigate();
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            //sending data in backend
-            const response = await axios.patch(
-                "http://localhost:8001/api/v1/users/update-account",
-                formData,
-                {
-                    withCredentials: true,
-                }
-            );
-            console.log("response: ", response);
+    const location = useLocation();
+    const dispatch = useDispatch();
+    // const { user } = location.state || {}; // Get the user object from the location state
 
-            if (response.status === 200) {
-                console.log("User Update successfully:", response.data);
-                alert("Update successful!");
-                navigate("/profile-details");
-            } else {
-                alert("Unexpected response from server. Please try again.");
+    const { user, isAuthenticated, loading, error } = useSelector(
+        (state) => state.auth
+    );
+
+    // Redirect to login if not authenticated.
+    useEffect(() => {
+        // dispatch(getCurrentLoggedInUser());
+        if (!isAuthenticated) {
+            navigate("/login");
+        }
+    }, [isAuthenticated, navigate]);
+
+    if (loading) return <Loader />;
+    if (!user) return <p>No user data found.</p>;
+
+    //console.log("edit user: ", user);
+
+    const methods = useForm({
+        defaultValues: {
+            username: user?.username,
+            fullName: user?.fullName,
+            email: user?.email,
+            phone: user?.phone,
+            travelPreference: user?.travelPreference || [],
+            languages: user?.languages || [],
+            address: user?.address,
+        },
+    });
+
+    const {
+        register,
+        control,
+        handleSubmit,
+        formState: { errors },
+    } = methods;
+
+    const travelPreferenceOptions = [
+        { value: "adventure", label: "Adventure" },
+        { value: "relaxation", label: "Relaxation" },
+        { value: "cultural", label: "Cultural" },
+        { value: "nature", label: "Nature" },
+    ];
+
+    const languageOptions = [
+        { value: "english", label: "English" },
+        { value: "hindi", label: "Hindi" },
+        { value: "urdu", label: "Urdu" },
+        { value: "bhojpuri", label: "Bhojpuri" },
+        { value: "maithili", label: "Maithili" },
+        { value: "bengali", label: "Bengali" },
+        { value: "marathi", label: "Marathi" },
+        { value: "punjabi", label: "Punjabi" },
+        { value: "gujarati", label: "Gujarati" },
+        { value: "telugu", label: "Telugu" },
+        { value: "tamil", label: "Tamil" },
+        { value: "kannada", label: "Kannada" },
+        { value: "spanish", label: "Spanish" },
+        { value: "french", label: "French" },
+    ];
+
+    const handleUpdateProfileForm = async (data) => {
+        console.log("submitted data", data);
+        try {
+            const regResult = await dispatch(updateProfileDetails(data));
+            console.log("Registration result:", regResult);
+            if (
+                updateProfileDetails.fulfilled.match(regResult) &&
+                regResult.payload.statusCode === 201
+            ) {
+                navigate("/profile");
             }
         } catch (error) {
             console.log("Error while updating user:", error.message);
@@ -59,57 +100,110 @@ const EditProfile = () => {
                         profile.
                     </p>
                 </div>
-                <form action="" method="post" onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        name="fullName"
-                        id="fullName"
-                        placeholder="Name"
-                        autoComplete="name"
-                        className="w-full p-2 mt-4 border-b-2 border-gray-300 shadow-sm rounded-b-md focus:outline-none focus:border-button-color"
-                        required
-                        onChange={getValues}
-                        value={formData.fullName}
-                    />
-                    <input
-                        type="text"
-                        name="username"
-                        id="username"
-                        placeholder="Username"
-                        autoComplete="username"
-                        className="w-full p-2 mt-4 border-b-2 border-gray-300 shadow-sm rounded-b-md focus:outline-none focus:border-button-color"
-                        required
-                        onChange={getValues}
-                        value={formData.username}
-                    />
-                    <input
-                        type="email"
-                        name="email"
-                        id="email"
-                        placeholder="Email"
-                        autoComplete="email"
-                        className="w-full p-2 mt-4 border-b-2 border-gray-300 shadow-sm rounded-b-md focus:outline-none focus:border-button-color"
-                        required
-                        onChange={getValues}
-                        value={formData.email}
-                    />
 
-                    <input
-                        type="tel"
-                        name="phone"
-                        id="phone"
-                        placeholder="Phone Number"
-                        autoComplete="tel"
-                        className="w-full p-2 mt-4 border-b-2 border-gray-300 shadow-sm rounded-b-md focus:outline-none focus:border-button-color"
-                        required
-                        onChange={getValues}
-                        value={formData.phone}
-                    />
+                <FormProvider {...methods}>
+                    <form onSubmit={handleSubmit(handleUpdateProfileForm)}>
+                        <div>
+                            <Input
+                                label="Full Name"
+                                placeholder="Enter your full name"
+                                {...methods.register("fullName", {
+                                    required: "Full Name is required",
+                                })}
+                            />
+                            {errors.fullName && (
+                                <p className="text-red-500 text-sm">
+                                    {errors.fullName.message}
+                                </p>
+                            )}
+                        </div>
 
-                    <button className="bg-button-color w-full px-8 py-3 shadow-black shadow-sm rounded-full text-white  text-xl mt-8 hover:cursor-pointer hover:bg-button-color-hover">
-                        Update
-                    </button>
-                </form>
+                        <div>
+                            <Input
+                                label="Email"
+                                type="email"
+                                autoComplete="email"
+                                placeholder="Enter your email"
+                                {...methods.register("email", {
+                                    required: "Email is required",
+                                })}
+                            />
+                            {errors.email && (
+                                <p className="text-red-500 text-sm">
+                                    {errors.email.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <Input
+                                label="Phone"
+                                type="tel"
+                                autoComplete="tel"
+                                placeholder="Enter your phone number"
+                                {...methods.register("phone", {
+                                    required: "Phone number is required",
+                                })}
+                            />
+                            {errors.phone && (
+                                <p className="text-red-500 text-sm">
+                                    {errors.phone.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <Input
+                                label="Username"
+                                type="text"
+                                autoComplete="username"
+                                placeholder="Enter your username"
+                                {...methods.register("username", {
+                                    required: "Username is required",
+                                })}
+                            />
+                            {errors.username && (
+                                <p className="text-red-500 text-sm">
+                                    {errors.username.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <CheckBox
+                            label="Travel Preferences:"
+                            name="travelPreference"
+                            options={travelPreferenceOptions}
+                        />
+
+                        <CheckBox
+                            label="Languages:"
+                            name="languages"
+                            options={languageOptions}
+                        />
+
+                        <div>
+                            <Input
+                                label="Address"
+                                type="text"
+                                autoComplete="username"
+                                placeholder="Enter your address"
+                                {...methods.register("address")}
+                            />
+                            {errors.address && (
+                                <p className="text-red-500 text-sm">
+                                    {errors.address.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <button
+                            className="bg-button-color w-full px-8 py-2 shadow-black shadow-sm rounded-full text-white  text-xl mt-4 hover:cursor-pointer hover:bg-button-color-hover"
+                            type="submit"
+                        >
+                            Update Profile
+                        </button>
+                    </form>
+                </FormProvider>
             </div>
         </main>
     );

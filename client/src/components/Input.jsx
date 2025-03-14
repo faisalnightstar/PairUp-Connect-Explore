@@ -3,7 +3,7 @@ import React, { forwardRef, useId } from "react";
 const Input = ({ label, type = "text", className = "", ...props }, ref) => {
     const id = useId();
     return (
-        <div>
+        <div className="w-full">
             {label && (
                 <label
                     className="inline-block justify-start text-start mb-1 pl-1"

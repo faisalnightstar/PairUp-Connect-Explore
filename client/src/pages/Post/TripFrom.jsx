@@ -57,13 +57,14 @@ const TripForm = () => {
 
         const response = await dispatch(createTrip(formData));
 
-        // Check if postTrip returned a fulfilled action and the response status is as expected
+        console.log("trip post response: ", response);
         // Check if createTrip was fulfilled and the status code is 201
         if (
             createTrip.fulfilled.match(response) &&
             response.payload.statusCode === 201
         ) {
-            navigate("/discover");
+            const tripId = response.payload.data._id;
+            navigate(`/view-post-details/${tripId}`);
         } else {
             alert("Failed to post trip.");
         }

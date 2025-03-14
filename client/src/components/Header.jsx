@@ -14,11 +14,16 @@ const Header = () => {
             <div className="max-w-8xl mx-auto">
                 <div className="flex items-center justify-between h-16 px-2  space-x-10 sm:px-0">
                     {/* Logo (Left on all devices) */}
-                    <div className="flex items-center">
+                    <div className="flex items-center rounded-xl">
                         <img
-                            src="LogoColor3.svg"
+                            src="https://res.cloudinary.com/pairup-connect/image/upload/v1741842768/pairup/public/efjqbohoogiopt0c28hh.png"
                             alt="Logo"
                             className="h-14 w-auto"
+                        />
+                        <img
+                            src="Logo1.svg"
+                            alt="Logo"
+                            className="h-14 w-auto hidden md:block"
                         />
                     </div>
                     {/* Search & Filter Buttons (Right on small screens) */}

@@ -31,7 +31,7 @@ const YourProfile = ({ user, joinedDate, isCurrentUser }) => {
                         {user.fullName}
                         <p className="mt-">
                             {" "}
-                            <span className="text-xs font-thin font-roboto bg-btn-bg-color rounded-full px-2 py-0.5 text-red-500">
+                            <span className="text-[0.5rem] tracking-widest font-poppins bg-btn-bg-color rounded-full px-2 py-0.5 text-red-500">
                                 @{user.username}
                             </span>{" "}
                         </p>

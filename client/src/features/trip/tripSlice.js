@@ -1,6 +1,10 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axios from "../../../axiosConfig.js";
 import envConfig from "../../../conf/envConfiq.js";
+import {
+    createSlice,
+    createAsyncThunk,
+    createSelector,
+} from "@reduxjs/toolkit";
 
 const initialState = {
     status: false,
@@ -46,7 +50,7 @@ export const singleTrip = createAsyncThunk(
             const response = await axios.get(
                 `${envConfig.BaseUrl}/users/trips/view-trip/${tripId}`
             );
-            return response.data;
+            return response.data.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
         }

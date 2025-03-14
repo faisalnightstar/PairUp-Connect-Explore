@@ -9,7 +9,7 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
             req.cookies?.accessToken ||
             req.header("Authorization")?.replace("Bearer ", "");
 
-        //console.log("Token:", token);
+        //console.log("JWT received Token: ", token);
         if (!token) {
             throw new ApiError(401, "Unauthorized request");
         }
@@ -36,6 +36,12 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
         next();
     } catch (error) {
         //console.error("JWT Verification Error:", error);
+        if (error.name === "TokenExpiredError") {
+            throw new ApiError(
+                401,
+                error?.message || "JWT Verification Failed"
+            );
+        }
         throw new ApiError(401, error?.message || "JWT Verification Failed");
     }
 });

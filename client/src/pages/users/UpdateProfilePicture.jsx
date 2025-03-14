@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { updateUserAvatar } from "../../features/auth/authSlice";
 
 const UpdateProfilePicture = () => {
     const [image, setImage] = useState(null); // Selected image file
@@ -62,7 +63,10 @@ const UpdateProfilePicture = () => {
     };
 
     let navigate = useNavigate();
-    // Upload cropped image
+
+    const dispatch = useDispatch();
+
+    // Upload avatar image
     const handleUpload = async () => {
         if (!croppedImage) {
             alert("Please crop an image before uploading.");
@@ -72,29 +76,17 @@ const UpdateProfilePicture = () => {
         const formData = new FormData();
         formData.append("avatar", croppedImage, "avatar.jpg");
 
-        try {
-            const response = await axios.patch(
-                "http://localhost:8001/api/v1/users/update-avatar",
-                formData,
-                {
-                    headers: { "Content-Type": "multipart/form-data" },
-                    withCredentials: true,
-                }
-            );
-
-            if (response.status === 200) {
-                console.log("Avatar Updated successfully:", response.data);
-                alert("Avatar updated successfully!");
-                navigate("/profile-details");
-            } else {
-                alert("Unexpected response from server. Please try again.");
-            }
-        } catch (error) {
-            console.error(
-                "Error uploading avatar:",
-                error.response?.data || error.message
-            );
-            alert("Failed to update avatar.");
+        //sending data in backend
+        const response = await dispatch(updateUserAvatar(formData));
+        if (
+            updateUserAvatar.fulfilled.match(response) &&
+            response.payload.statusCode === 201
+        ) {
+            console.log("Avatar Updated successfully:", response.data);
+            alert("Avatar updated successfully!");
+            navigate("/profile");
+        } else {
+            alert("Unexpected response from server. Please try again.");
         }
     };
 

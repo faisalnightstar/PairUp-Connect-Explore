@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { loginUser } from "../../features/auth/authSlice";
 import { Input } from "../../components";
 import { MdEmail, MdLock, MdVisibility, MdVisibilityOff } from "react-icons/md";
@@ -55,7 +54,7 @@ const LoginForm = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto space-y-12 mt-20 bg-white p-8 rounded-lg shadow-md">
+        <div className="max-w-md mx-auto space-y-12 my-20 bg-white p-8 rounded-lg shadow-md">
             <div className="flex space-y-3 flex-col items-center">
                 <img src="/Logo1.svg" alt="" className="h-18 w-xs" />
                 <h1 className="text-4xl text-center font-bold font-roboto">
@@ -66,7 +65,7 @@ const LoginForm = () => {
                 </p>
             </div>
             <form
-                className="mt-8 space-y-6"
+                className="mt-4 space-y-6"
                 method="post"
                 onSubmit={handleSubmit(onSubmit)}
             >
@@ -75,15 +74,15 @@ const LoginForm = () => {
                         className="absolute justify-center left-3 top-3 text-gray-400"
                         size={16}
                     />
-                    <input
+                    <Input
                         type="email"
-                        {...register("email", {
-                            required: "email is required",
-                        })}
-                        placeholder="Email Address"
                         autoComplete="email"
-                        className="mt-1 block w-full pl-10 px-3 py-2 border-b-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-custom focus:border-button-color sm:text-sm"
+                        placeholder="Enter your email"
+                        {...register("email", {
+                            required: "Email is required",
+                        })}
                     />
+
                     {errors.email && (
                         <p className="text-red-500 text-xs mt-1">
                             {errors.email.message}
@@ -95,18 +94,20 @@ const LoginForm = () => {
                         className="absolute left-3 top-3 text-gray-400"
                         size={16}
                     />
-                    <input
-                        id="password"
-                        name="password"
-                        {...register("password", {
-                            required: "password is required",
-                        })}
+                    <Input
                         type={showPassword ? "text" : "password"}
-                        placeholder="Password"
-                        required
-                        autoComplete="current-password"
-                        className="mt-1 block w-full pl-10 pr-10 px-3 py-2 border-b-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-700 focus:border-button-color sm:text-sm"
+                        autoComplete="password"
+                        placeholder="Enter your password"
+                        {...register("password", {
+                            required: "Password is required",
+                            minLength: {
+                                value: 8,
+                                message:
+                                    "Password must be at least 6 characters long",
+                            },
+                        })}
                     />
+
                     {errors.password && (
                         <p className="text-red-500 text-xs mt-1">
                             {errors.password.message}
@@ -158,7 +159,7 @@ const LoginForm = () => {
                     </button>
                 </div>
             </form>
-            <div className="mt-6 justify-around flex flex-row">
+            <div className="mt-2 justify-around flex flex-row">
                 <button
                     type="button"
                     className=" flex justify-center text-center h-12 py-3 px-6 border border-gray-300 rounded-full shadow-sm  text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2  hover:cursor-pointer"
@@ -178,7 +179,7 @@ const LoginForm = () => {
                     <FaFacebook className="h-6 w-6" />
                 </button>
             </div>
-            <p className="text-center mt-8">
+            <p className="text-center mt-2">
                 Don't have an account?{" "}
                 <Link
                     to="/register"
@@ -187,7 +188,7 @@ const LoginForm = () => {
                     Sign Up
                 </Link>
             </p>
-            <div className="flex justify-center mt-8 space-x-4">
+            <div className="flex justify-center mt-4 space-x-4">
                 <div className="flex items-center">
                     <img
                         src="/SecureConnection.svg"

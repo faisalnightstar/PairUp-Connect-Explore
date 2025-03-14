@@ -62,58 +62,6 @@ const Navbar = () => {
                             <span className="text-xs">{item.name}</span>
                         </NavLink>
                     ))}
-                    {/* <NavLink
-                        to={"/"}
-                        className={({ isActive }) =>
-                            `flex flex-col items-center ${
-                                isActive
-                                    ? "text-button-color"
-                                    : "text-paragraph-color"
-                            } hover:text-button-color-hover`
-                        }
-                    >
-                        <FaCompass className="text-xl mb-1" />
-                        <span className="text-xs">Discover</span>
-                    </NavLink>
-                    <NavLink
-                        to={"/"}
-                        className={({ isActive }) =>
-                            `flex flex-col items-center ${
-                                isActive
-                                    ? "text-button-color"
-                                    : "text-paragraph-color"
-                            } hover:text-button-color-hover`
-                        }
-                    >
-                        <IoAddCircle className="text-xl mb-1" />
-                        <span className="text-xs">Post</span>
-                    </NavLink>
-                    <NavLink
-                        to={"/"}
-                        className={({ isActive }) =>
-                            `flex flex-col items-center ${
-                                isActive
-                                    ? "text-button-color"
-                                    : "text-paragraph-color"
-                            } hover:text-button-color-hover`
-                        }
-                    >
-                        <FaComments className="text-xl mb-1" />
-                        <span className="text-xs">Messages</span>
-                    </NavLink>
-                    <NavLink
-                        to={"/"}
-                        className={({ isActive }) =>
-                            `flex flex-col items-center ${
-                                isActive
-                                    ? "text-button-color"
-                                    : "text-paragraph-color"
-                            } hover:text-button-color-hover`
-                        }
-                    >
-                        <FaUser className="text-xl mb-1" />
-                        <span className="text-xs">Profile</span>
-                    </NavLink> */}
                 </Container>
             </header>
         </nav>

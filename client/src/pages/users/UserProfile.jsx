@@ -33,6 +33,8 @@ const UserProfile = () => {
         (state) => state.auth
     );
 
+    console.log("user: ", user);
+
     // Redirect to login if not authenticated.
     useEffect(() => {
         // dispatch(getCurrentLoggedInUser());
@@ -133,10 +135,8 @@ const UserProfile = () => {
                     </nav>
                 </main>
             ) : (
-                navigate("/login")
+                <Loader />
             )}
-
-            <Navbar />
         </div>
     );
 
