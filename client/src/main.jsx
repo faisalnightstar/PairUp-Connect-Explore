@@ -21,6 +21,7 @@ import {
     GetStarted,
     EditProfile,
     ViewPostDetails,
+    ViewOtherUserDetails,
 } from "./pages/index.js";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
@@ -97,6 +98,10 @@ const router = createBrowserRouter([
                         <EditProfile />,
                     </ProtectedRoute>
                 ),
+            },
+            {
+                path: "/user/:username",
+                element: <ViewOtherUserDetails />,
             },
         ],
     },

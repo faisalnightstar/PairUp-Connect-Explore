@@ -95,7 +95,10 @@ const postTrip = asyncHandler(async (req, res) => {
 // ✅ Get all trips
 const getAllTrip = asyncHandler(async (req, res) => {
     try {
-        const trip = await Trip.find(req.trip);
+        const trip = await Trip.find(req.trip)
+            .populate("organizer", "fullName username email avatar")
+            .populate("participants", "fullName username email avatar");
+
         //console.log("All trips: ", trip);
         if (!trip) {
             console.error("Error in getTrip:", error);
@@ -198,8 +201,7 @@ const joinTrip = asyncHandler(async (req, res) => {
 
         console.log(`
         tripId: ${tripId}
-        userId: ${userId}
-        `);
+        userId: ${userId} for joining trip`);
 
         const trip = await Trip.findById(tripId);
         if (!trip) {
@@ -208,20 +210,16 @@ const joinTrip = asyncHandler(async (req, res) => {
 
         // Check if user is already in the trip
         if (trip.participants.includes(userId)) {
-            return res
-                .status(401)
-                .json({ message: "You have already joined this trip" });
+            throw new ApiError(401, "You have already joined this trip");
         }
 
         // Add user to the trip
         trip.participants.push(userId);
         await trip.save();
 
-        new ApiResponse(201, trip, "Joined trip successfully");
-
-        res.status(200).json(
-            new ApiResponse(200, trip, "Joined trip successfully")
-        );
+        return res
+            .status(200)
+            .json(new ApiResponse(201, trip, "Joined trip successfully"));
     } catch (error) {
         console.error("Error joining trip:", error);
         throw new ApiError(500, "Something went wrong while joining trip");

@@ -19,7 +19,7 @@ const Discover = () => {
     const dispatch = useDispatch();
 
     const { trip, loading, error } = useSelector(selectTripData, shallowEqual);
-    //console.log("trip: ", trip);
+    console.log("trip in discover: ", trip);
 
     useEffect(() => {
         const fetchData = async () => {

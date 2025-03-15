@@ -4,10 +4,10 @@ import { MdStarRate } from "react-icons/md";
 
 const UserReviewsDeatils = ({ userDetail, joinedDate }) => {
     return (
-        <main className="flex-grow mt-10 mb-20 max-w-8xl mx-auto px-2 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <main className="flex flex-grow items-center justify-center my-2 max-w-8xl mx-auto sm:px-2 md:px-4 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 space-y-4 md:space-x-4">
                 {/* Review Card 1 */}
-                <div className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md w-72 transition-shadow">
+                <div className="bg-red-100 rounded-xl shadow-sm p-4 hover:shadow-md w-72 transition-shadow">
                     <div className="flex flex-row items-start space-x-4 mb-2">
                         <img
                             src={userDetail?.avatar}
@@ -39,7 +39,7 @@ const UserReviewsDeatils = ({ userDetail, joinedDate }) => {
                 </div>
 
                 {/* Review Card 2 */}
-                <div className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md w-72 transition-shadow">
+                <div className="bg-red-400 rounded-xl shadow-md p-4 hover:shadow-neutral-400 w-72 transition-shadow">
                     <div className="flex flex-row items-start space-x-4 mb-2">
                         <img
                             src={userDetail?.avatar}

@@ -40,9 +40,6 @@ const tripSchema = new mongoose.Schema(
                 activity: String,
             },
         ],
-        // images: {
-        //     type: String, // Cloudinary image URLs
-        // },
         coverImage: {
             type: String, // cloudinary URL
         },

@@ -2,7 +2,7 @@ import React from "react";
 import { Loader } from "../../components";
 
 const UserDetails = ({ userDetail }) => {
-    console.log("userDeatils: ", userDetail);
+    //console.log("userDeatils: ", userDetail);
     return (
         <>
             {userDetail ? (

@@ -64,7 +64,9 @@ const TripForm = () => {
             response.payload.statusCode === 201
         ) {
             const tripId = response.payload.data._id;
-            navigate(`/view-post-details/${tripId}`);
+            alert("Trip posted successfully!");
+            navigate("/discover");
+            //navigate(`/view-post-details/${tripId}`);
         } else {
             alert("Failed to post trip.");
         }

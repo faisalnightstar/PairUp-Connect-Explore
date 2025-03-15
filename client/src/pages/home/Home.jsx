@@ -17,7 +17,7 @@ const Home = () => {
     const dispatch = useDispatch();
 
     const { trip, loading, error } = useSelector(selectTripData, shallowEqual);
-    console.log("home trip data: ", trip);
+    // console.log("home trip data: ", trip);
 
     useEffect(() => {
         const fetchData = async () => {

@@ -16,12 +16,7 @@ const ViewPostDetails = () => {
         state.trip.trip.find((t) => t._id === tripId)
     );
 
-    const { selectedTrip, loading } = useSelector((state) => state.trip);
-
-    console.log("tripId: ", tripId);
-    // console.log("View Trip Details: ", tripDetail);
-
-    //console.log("selectedTrip", selectedTrip);
+    const { selectedTrip, loading, error } = useSelector((state) => state.trip);
 
     useEffect(() => {
         if (tripDetail == undefined) {
@@ -32,10 +27,13 @@ const ViewPostDetails = () => {
     if (tripDetail == undefined) {
         tripDetail = selectedTrip;
     }
-    console.log("selectTripById tripDetail", tripDetail);
 
     if (loading || !tripDetail) return <Loader />;
-
+    if (error) {
+        return (
+            <p className="text-red-500 mt-36">Something went wrong: {error}</p>
+        );
+    }
     // Rendering the trip details
 
     const userLocale = navigator.language || "en-US"; // Auto-detect currentUser locale

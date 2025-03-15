@@ -33,7 +33,7 @@ const UserProfile = () => {
         (state) => state.auth
     );
 
-    console.log("user: ", user);
+    //console.log("user: ", user);
 
     // Redirect to login if not authenticated.
     useEffect(() => {
@@ -56,22 +56,26 @@ const UserProfile = () => {
                                 Your Profile
                             </h1>
                             {error && <p className="text-red-500">{error}</p>}
-                            <YourProfile
-                                user={user}
-                                joinedDate={joinedDate}
-                                isCurrentUser={true}
-                            />
+                            {isAuthenticated && (
+                                <YourProfile
+                                    user={user}
+                                    joinedDate={joinedDate}
+                                    isCurrentUser={true}
+                                />
+                            )}
                         </div>
                         <div className=" ">
-                            <Link
-                                to={{
-                                    pathname: "/edit-profile",
-                                    state: { userData: user },
-                                }}
-                                className="bg-button-color p-1 px-4 rounded-full hover:cursor-pointer hover:bg-button-color-hover text-white  text-xs"
-                            >
-                                Edit Profile
-                            </Link>
+                            {isAuthenticated && (
+                                <Link
+                                    to={{
+                                        pathname: "/edit-profile",
+                                        state: { userData: user },
+                                    }}
+                                    className="bg-button-color p-1 px-4 rounded-full hover:cursor-pointer hover:bg-button-color-hover text-white  text-xs"
+                                >
+                                    Edit Profile
+                                </Link>
+                            )}
                         </div>
                     </div>
 
@@ -83,7 +87,7 @@ const UserProfile = () => {
                                     onClick={() =>
                                         setActiveComponent("details")
                                     }
-                                    className={`pb-2 text-sm font-poppins font-medium hover:cursor-pointer  ${
+                                    className={`pb-2 text-xs font-poppins font-medium hover:cursor-pointer  ${
                                         activeComponent === "details"
                                             ? "text-button-color border-b-2 "
                                             : "text-paragraph-color"
@@ -93,17 +97,17 @@ const UserProfile = () => {
                                 </button>
                                 <button
                                     onClick={() => setActiveComponent("trips")}
-                                    className={`pb-2 text-sm font-poppins font-medium hover:cursor-pointer  ${
+                                    className={`pb-2 text-xs font-poppins font-medium hover:cursor-pointer  ${
                                         activeComponent === "trips"
                                             ? "text-button-color border-b-2 "
                                             : "text-paragraph-color"
                                     }`}
                                 >
-                                    Trips
+                                    My Trips
                                 </button>
                                 <button
                                     onClick={() => setActiveComponent("review")}
-                                    className={`pb-2 text-sm font-poppins font-medium hover:cursor-pointer ${
+                                    className={`pb-2 text-xs font-poppins font-medium hover:cursor-pointer ${
                                         activeComponent === "review"
                                             ? "text-button-color border-b-2 "
                                             : "text-paragraph-color"

@@ -1,28 +1,32 @@
-import envConfig from "../../../confiq/envConfiq";
 import { useParams } from "react-router-dom";
-
 import React, { useEffect, useState } from "react";
-import UserDetails from "./UserDetails";
-//import cookies from "js-cookie";
-import cookieParser from "cookie-parser";
-import Cookies from "js-cookie";
-import UserTripsDetails from "./UserTripsDetails";
-import UserReviewsDeatils from "./UserReviewsDeatils";
-import Navbar from "../Navbar/Navbar";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import YourProfile from "./YourProfile";
-import NullTrips from "./NullTrips";
-import Loader from "../../components/Loader";
-import { Link } from "react-router-dom";
+import {
+    UserDetails,
+    UserTripsDetails,
+    UserReviewsDeatils,
+    YourProfile,
+    NullTrips,
+} from "../../users/index.js";
+import { Loader } from "../../../components";
+import { useDispatch, useSelector } from "react-redux";
+import { otherUser } from "../../../features/user/userSlice";
 
 const ViewOtherUserDetails = () => {
     const { username } = useParams();
-    const [user, setUser] = useState(null);
-    console.log("find user by username : ", user);
+    const dispatch = useDispatch();
+    //console.log("find user by username : ", username);
+
+    const { user, loading, error } = useSelector((state) => state.user);
+
+    useEffect(() => {
+        try {
+            dispatch(otherUser(username));
+        } catch (error) {
+            console.error("Error fetching user by username details:", error);
+        }
+    }, [username]);
 
     const userLocale = navigator.language || "en-US"; // Auto-detect user locale
-    //console.log("User :", user);
     const joinedDate = (isoDate) => {
         if (!isoDate) return "N/A";
         const date = new Date(isoDate);
@@ -34,24 +38,21 @@ const ViewOtherUserDetails = () => {
 
     const [activeComponent, setActiveComponent] = useState("details");
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await axios.get(
-                    `${envConfig.API_URL}/users/find/find-user/${username}`
-                );
-                setUser(response.data.data);
-            } catch (error) {
-                console.error("Error fetching user details:", error);
-            }
-        };
+    if (loading) {
+        return <Loader />;
+    }
 
-        fetchUser();
-    }, [username]);
+    if (error) {
+        return (
+            <p className="text-center text-xl h-screen/2 font-bold mt-16 text-gray-500">
+                Something went wrong {error}
+            </p>
+        );
+    }
 
     if (!user) {
         return (
-            <p className="text-center text-xl h-screen/2 font-bold mt-16 text-gray-500">
+            <p className="text-center text-xl h-screen/2 font-bold mt-36 text-gray-500">
                 User not found
             </p>
         );
@@ -143,8 +144,6 @@ const ViewOtherUserDetails = () => {
                 ) : (
                     <Loader />
                 )}
-
-                <Navbar />
             </div>
         </>
     );

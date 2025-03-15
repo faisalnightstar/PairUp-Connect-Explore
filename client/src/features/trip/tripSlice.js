@@ -1,10 +1,6 @@
 import axios from "../../../axiosConfig.js";
 import envConfig from "../../../conf/envConfiq.js";
-import {
-    createSlice,
-    createAsyncThunk,
-    createSelector,
-} from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const initialState = {
     status: false,
@@ -57,6 +53,33 @@ export const singleTrip = createAsyncThunk(
     }
 );
 
+export const joinTrip = createAsyncThunk(
+    "trip/joinTrip",
+    async (tripId, { rejectWithValue, getState }) => {
+        try {
+            const { user } = getState().auth;
+            console.log("User in joinTrip thunk: ", user);
+
+            if (!user) {
+                console.log("User not authenticated");
+                return rejectWithValue({ message: "User not authenticated" });
+            }
+
+            const response = await axios.post(
+                `${envConfig.BaseUrl}/users/trips/join-trip/${tripId}`,
+                { userId: user._id }
+            );
+
+            return response.data.data;
+        } catch (error) {
+            console.error("Error in joinTrip thunk:", error);
+            return rejectWithValue(
+                error.response ? error.response.data : error.message
+            );
+        }
+    }
+);
+
 const tripSlice = createSlice({
     name: "trip",
     initialState,
@@ -99,6 +122,19 @@ const tripSlice = createSlice({
                 state.selectedTrip = action.payload;
             })
             .addCase(singleTrip.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Something went wrong";
+            })
+            .addCase(joinTrip.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(joinTrip.fulfilled, (state, action) => {
+                state.loading = false;
+                state.status = true;
+                state.selectedTrip = action.payload;
+            })
+            .addCase(joinTrip.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || "Something went wrong";
             });

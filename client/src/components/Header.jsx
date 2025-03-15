@@ -21,13 +21,18 @@ const Header = () => {
                             className="h-14 w-auto"
                         />
                         <img
-                            src="Logo1.svg"
+                            src="https://res.cloudinary.com/pairup-connect/image/upload/v1742051927/pairup/public/ei6xpilmkej0n9bsjusi.png"
                             alt="Logo"
                             className="h-14 w-auto hidden md:block"
                         />
                     </div>
                     {/* Search & Filter Buttons (Right on small screens) */}
                     <div className="flex items-center space-x-4 sm:flex-grow sm:justify-end">
+                        <div className="relative">
+                            <p className="absolute top-0 right-0 text-xs text-gray-600">
+                                Saved
+                            </p>
+                        </div>
                         {/* Search Button */}
                         <button
                             className="bg-gray-100 p-2 rounded-full"

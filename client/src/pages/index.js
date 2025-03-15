@@ -1,5 +1,7 @@
-import Home from "./home/Home";
+import SplashScreen from "./getStarted/SplashScreen";
+import GetStarted from "./getStarted/GetStarted";
 
+import Home from "./home/Home";
 import RegisterPage from "./auth//RegisterPage";
 import LoginPage from "./auth/LoginForm";
 import Discover from "./discover/Discover";
@@ -9,9 +11,8 @@ import MessagePage from "./message/MessagePage";
 import UserProfile from "./users/UserProfile";
 import ProfilesDetails from "./profile/ProfilesDetails";
 import UpdateProfilePicture from "./users/UpdateProfilePicture";
-import SplashScreen from "./getStarted/SplashScreen";
-import GetStarted from "./getStarted/GetStarted";
 import EditProfile from "./users/EditProfile";
+import ViewOtherUserDetails from "./viewDeatails/user/ViewOtherUserDetails";
 
 export {
     Home,
@@ -27,4 +28,5 @@ export {
     SplashScreen,
     GetStarted,
     EditProfile,
+    ViewOtherUserDetails,
 };

@@ -4,6 +4,7 @@ import storage from "redux-persist/lib/storage";
 //import { authSlice } from "../features";
 import authReducer from "../features/auth/authSlice.js";
 import tripReducer from "../features/trip/tripSlice.js";
+import userReducer from "../features/user/userSlice.js";
 
 // persist configuration
 // const persistConfig = {
@@ -34,6 +35,6 @@ import tripReducer from "../features/trip/tripSlice.js";
 // export default store;
 
 const store = configureStore({
-    reducer: { auth: authReducer, trip: tripReducer },
+    reducer: { auth: authReducer, trip: tripReducer, user: userReducer },
 });
 export default store;
