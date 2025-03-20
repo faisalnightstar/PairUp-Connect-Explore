@@ -2,7 +2,10 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import { Loader } from "../components/index.js";
-import { getCurrentLoggedInUser } from "../features/auth/authSlice.js";
+import {
+    getCurrentLoggedInUser,
+    refreshAccessToken,
+} from "../features/auth/authSlice.js";
 
 const ProtectedRoute = ({ children }) => {
     const dispatch = useDispatch();
@@ -15,8 +18,8 @@ const ProtectedRoute = ({ children }) => {
             if (!initialized && !loading) {
                 if (!isAuthenticated) {
                     try {
-                        await dispatch(refreshToken()).unwrap(); // Wait for refreshToken to complete
-                        await dispatch(getCurrentLoggedInUser()).unwrap(); // Wait for getCurrentLoggedInUser to complete
+                        await dispatch(refreshAccessToken()).unwrap(); // Wait for refreshToken to complete
+                        //await dispatch(getCurrentLoggedInUser()).unwrap(); // Wait for getCurrentLoggedInUser to complete
                         // isAuthenticated will be updated by getCurrentLoggedInUser success action.
                     } catch (error) {
                         // Handle refreshToken or getCurrentLoggedInUser failure

@@ -1,23 +1,52 @@
-// TripForm.jsx
-import React from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import React, { useContext, useEffect, useState } from "react";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { FaPlaneDeparture, FaUser } from "react-icons/fa";
 import { FaIndianRupeeSign, FaLocationDot } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { createTrip } from "../../features/trip/tripSlice";
+import { LocationContext } from "../../components/LocationProvider";
 
 const TripForm = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { location } = useContext(LocationContext);
+    const { latitude, longitude } = location;
+    const lat = latitude;
+    const lng = longitude;
+    console.log(`In trip form lat: ${lat} lng: ${lng}`);
+
+    // State to store latitude and longitude
+    //const [lat, setLat] = useState(null);
+    // const [lng, setLng] = useState(null);
+    const [locationError, setLocationError] = useState(null);
+
+    // Get current location when component mounts
+    // useEffect(() => {
+    //     if (navigator.geolocation) {
+    //         navigator.geolocation.getCurrentPosition(
+    //             (position) => {
+    //                 setLat(position.coords.latitude);
+    //                 setLng(position.coords.longitude);
+    //             },
+    //             (error) => {
+    //                 console.error("Error getting location:", error);
+    //                 setLocationError(error.message + ".");
+    //             }
+    //         );
+    //     } else {
+    //         setLocationError("Geolocation is not supported by your browser.");
+    //     }
+    // }, []);
+    const { error } = useSelector((state) => state.location);
 
     const {
         register,
         handleSubmit,
         control,
         watch,
-        formState: { errors },
+        formState: { isValid, isSubmitting, errors },
     } = useForm({
         defaultValues: {
             destination: "",
@@ -31,15 +60,22 @@ const TripForm = () => {
             coverImage: null,
         },
     });
+    console.log(`isValid: ${isValid}, isSubmitting: ${isSubmitting}`);
 
     const { fields, append, remove } = useFieldArray({
         control,
         name: "itinerary",
     });
 
+    const maxLength = 500;
+    const description = useWatch({
+        control,
+        name: "description",
+        defaultValue: "",
+    });
+
     const onSubmit = async (data) => {
         console.log("Form Data:", data);
-        // Create FormData for file uploads
         const formData = new FormData();
         formData.append("destination", data.destination);
         formData.append("categories", data.categories);
@@ -49,16 +85,30 @@ const TripForm = () => {
         formData.append("budget", data.budget);
         formData.append("description", data.description);
         formData.append("itinerary", JSON.stringify(data.itinerary));
+
+        // Append the cover image if available
         if (data.coverImage && data.coverImage[0]) {
             formData.append("coverImage", data.coverImage[0], "coverImage.jpg");
         }
 
-        // Here you can dispatch your redux-thunk action (e.g., postTrip(formData))
+        // Append latitude and longitude
+        // Ensure these values are available, otherwise handle appropriately
+        if (lat && lng) {
+            formData.append("lat", lat);
+            formData.append("lng", lng);
+        } else {
+            console.error(
+                "Location not available, trip cannot be posted without coordinates."
+            );
+            return alert(
+                "Location not available, trip cannot be posted without coordinates."
+            );
+        }
 
+        // Dispatch your createTrip action
         const response = await dispatch(createTrip(formData));
-
         console.log("trip post response: ", response);
-        // Check if createTrip was fulfilled and the status code is 201
+
         if (
             createTrip.fulfilled.match(response) &&
             response.payload.statusCode === 201
@@ -66,18 +116,16 @@ const TripForm = () => {
             const tripId = response.payload.data._id;
             alert("Trip posted successfully!");
             navigate("/discover");
-            //navigate(`view-post-details/${tripId}`);
         } else {
             alert("Failed to post trip.");
         }
 
-        // For demonstration, we'll log the formData keys.
+        // For demonstration, log formData keys
         for (let [key, value] of formData.entries()) {
             console.log(key, value);
         }
     };
 
-    // Use watch to get the current startDate value for validation of endDate
     const startDateValue = watch("startDate");
 
     return (
@@ -96,6 +144,13 @@ const TripForm = () => {
                     <p className="text-center text-sm font-roboto text-paragraph-color">
                         Share your travel plans and find companions
                     </p>
+                    {error && (
+                        <p className="text-red-500 max-w-sm text-center text-xs">
+                            {error}. <br />
+                            Location is required to post a trip so that other
+                            users can find you.
+                        </p>
+                    )}
                 </div>
 
                 <form
@@ -285,7 +340,7 @@ const TripForm = () => {
                     </div>
 
                     {/* Description */}
-                    <div>
+                    <div className="relative">
                         <label
                             htmlFor="description"
                             className="ml-2 font-roboto"
@@ -301,7 +356,11 @@ const TripForm = () => {
                             className="w-full px-3 py-2 border-b-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-custom focus:border-button-color sm:text-sm"
                             cols="5"
                             rows="5"
+                            maxLength={maxLength}
                         ></textarea>
+                        <span className="absolute bottom-2 right-2 text-xs text-gray-500">
+                            {description.length}/{maxLength}
+                        </span>
                         {errors.description && (
                             <p className="text-red-500 text-sm">
                                 {errors.description.message}
@@ -370,10 +429,13 @@ const TripForm = () => {
                     </div>
 
                     <button
+                        disabled={isSubmitting || !isValid}
                         type="submit"
-                        className="bg-button-color w-full px-8 py-3 shadow-black shadow-sm rounded-full text-white text-xl hover:cursor-pointer hover:bg-button-color-hover"
+                        className={`bg-button-color w-full px-8 py-3 shadow-black shadow-sm rounded-full text-white text-xl hover:cursor-pointer hover:bg-button-color-hover ${
+                            isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                     >
-                        Post You Trip
+                        {isSubmitting ? "Submitting" : "Post Your Trip"}
                     </button>
                 </form>
             </div>

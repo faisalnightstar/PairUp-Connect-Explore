@@ -7,13 +7,14 @@ import {
     FaCalendar,
 } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Loader from "./loader/Loader";
 
 const TripPostCard = ({ tripItem }) => {
-    // console.log("tripItem: ", tripItem);
+    //console.log("tripItem: ", tripItem);
 
     const navigate = useNavigate();
+    const location = useLocation();
     const userLocale = navigator.language || "en-US"; // Auto-detect user locale
 
     const tripStartDate = (isoDate) => {
@@ -35,8 +36,17 @@ const TripPostCard = ({ tripItem }) => {
     };
 
     const handleUserClick = (tripId) => {
-        navigate(`/view-post-details/${tripId}`);
+        const basePath = location.pathname.startsWith(
+            "http://localhost:5173/discover"
+        )
+            ? "/discover"
+            : "";
+
+        navigate(`${basePath}/view-post-details/${tripId}`);
     };
+    // const handleUserClick = (tripId) => {
+    //     navigate(`view-post-details/${tripId}`);
+    // };
 
     return (
         <div className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md w-96 h-96 transition-shadow">
@@ -58,7 +68,7 @@ const TripPostCard = ({ tripItem }) => {
                     </span>
                     <span className="text-gray-600 flex items-center">
                         <FaUsers className="mr-2 text-custom" />
-                        {tripItem.participants?.length} Joined
+                        {tripItem?.participantCount} Joined
                     </span>
                 </div>
                 <div className="flex items-center justify-between mb-4">
@@ -68,7 +78,7 @@ const TripPostCard = ({ tripItem }) => {
                             {tripItem.destination}
                         </h3>
                         <p className="text-gray-600 items-center text-xs w-64 truncate">
-                            {tripItem.description}
+                            {tripItem?.description}
                         </p>
                     </div>
                     <button className="!rounded-button text-fonts-color p-2 hover:text-button-color hover:cursor-pointer">

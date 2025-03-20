@@ -54,7 +54,7 @@ const UserDetails = ({ userDetail }) => {
                                 userDetail.travelPreference.map((travel) => (
                                     <p
                                         key={travel}
-                                        className="text-xs font-roboto bg-btn-bg-color rounded-full px-2 text-button-color"
+                                        className="text-xs font-roboto capitalize bg-btn-bg-color rounded-full px-2 text-button-color"
                                     >
                                         {travel}
                                     </p>
@@ -64,7 +64,7 @@ const UserDetails = ({ userDetail }) => {
                             <h2 className="font-roboto text-md font-bold">
                                 Language
                             </h2>
-                            <div className="flex felx-row flex-wrap items-center space-x-1 space-y-1 mt-2">
+                            <div className="flex felx-row capitalize flex-wrap items-center space-x-1 space-y-1 mt-2">
                                 {userDetail.languages &&
                                     userDetail.languages.map((language) => (
                                         <p

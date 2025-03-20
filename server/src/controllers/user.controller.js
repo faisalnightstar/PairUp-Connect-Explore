@@ -9,6 +9,7 @@ import {
 import { ApiResponse } from "../utils/ApiResponse.js";
 import fs from "fs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
     try {
@@ -193,6 +194,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const loggedInUser = await User.findById(user._id).select(
         "-password -refreshToken"
     );
+
     //now securing the token before sending through cookies
     const options = {
         httpOnly: true,
@@ -219,6 +221,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
+    console.log("logoutUser", req.user._id);
     await User.findByIdAndUpdate(
         req.user._id,
         {
@@ -585,30 +588,104 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         );
 });
 
+// const getTripHistory = asyncHandler(async (req, res) => {
+//     const user = await User.aggregate([
+//         {
+//             $match: {
+//                 _id: new mongoose.Types.ObjectId(req.user._id),
+//             },
+//         },
+//         {
+//             $lookup: {
+//                 from: "trips",
+//                 localField: "_id",
+//                 foreignField: "organizer",
+//                 as: "tripHistory",
+//                 pipeline: [
+//                     {
+//                         $lookup: {
+//                             from: "users",
+//                             localField: "organizer",
+//                             foreignField: "_id",
+//                             as: "organizer",
+//                             pipeline: [
+//                                 {
+//                                     $project: {
+//                                         fullName: 1,
+//                                         username: 1,
+//                                         avatar: 1,
+//                                     },
+//                                 },
+//                             ],
+//                         },
+//                     },
+//                     {
+//                         $addFields: {
+//                             organizer: {
+//                                 $first: "$organizer",
+//                             },
+//                         },
+//                     },
+//                 ],
+//             },
+//         },
+//     ]);
+
+//     return res
+//         .status(200)
+//         .json(
+//             new ApiResponse(
+//                 201,
+//                 user[0].tripHistory,
+//                 "Watch history fetched successfully bc"
+//             )
+//         );
+// });
+
 const getTripHistory = asyncHandler(async (req, res) => {
     const user = await User.aggregate([
         {
             $match: {
-                _id: req.user._id,
+                _id: new mongoose.Types.ObjectId(req.user._id),
             },
         },
         {
             $lookup: {
                 from: "trips",
-                localField: "tripHistory",
-                foreignField: "_id",
+                localField: "_id",
+                foreignField: "organizer",
                 as: "tripHistory",
+                // pipeline: [
+                //     {
+                //         $project: {
+                //             destination: 1,
+                //             participants: 1,
+                //             coverImage: 1,
+                //             startDate: 1,
+                //             endDate: 1,
+                //             "organizer._id": 1,
+                //         },
+                //     },
+                //     {
+                //         $addFields: {
+                //             organizer: {
+                //                 $first: "$tripHistory",
+                //             },
+                //         },
+                //     },
+                // ],
                 pipeline: [
                     {
                         $lookup: {
                             from: "users",
-                            localField: "organizer", // organizer of the trip
+                            localField: "organizer",
                             foreignField: "_id",
                             as: "organizer",
                             pipeline: [
                                 {
                                     $project: {
-                                        fullname: 1,
+                                        fullName: 1,
+                                        _id: 1,
                                         username: 1,
                                         avatar: 1,
                                     },
@@ -618,7 +695,28 @@ const getTripHistory = asyncHandler(async (req, res) => {
                     },
                     {
                         $addFields: {
-                            organizer: "$organizer",
+                            organizer: {
+                                $first: "$organizer",
+                            },
+                        },
+                    },
+                ],
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "participants",
+                            foreignField: "_id",
+                            as: "participants",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullName: 1,
+                                        username: 1,
+                                        avatar: 1,
+                                    },
+                                },
+                            ],
                         },
                     },
                 ],
@@ -626,17 +724,13 @@ const getTripHistory = asyncHandler(async (req, res) => {
         },
     ]);
 
-    if (!user?.length) {
-        throw new ApiError(404, "User not found in tripHistory");
-    }
-
     return res
         .status(200)
         .json(
             new ApiResponse(
-                200,
+                201,
                 user[0].tripHistory,
-                "Trip history fetched successfully"
+                "Watch history fetched successfully bc"
             )
         );
 });

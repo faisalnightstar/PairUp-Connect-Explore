@@ -64,7 +64,7 @@ export const refreshAccessToken = createAsyncThunk(
         try {
             console.log("Refreshing aceess token...");
             const response = await axios.post(
-                `${envConfig.BaseUrl}/users/refresh-accessToken`,
+                `${envConfig.BaseUrl}/users/refresh-token`,
                 {
                     withCredentials: true,
                 }

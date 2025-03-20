@@ -123,13 +123,9 @@ const ViewOtherUserDetails = () => {
                                     {activeComponent === "details" && (
                                         <UserDetails userDetail={user} />
                                     )}
-                                    {/* {user ? ({activeComponent === "trips" && (
-                                <UserTripsDetails />) }
-                            ) : (
-                                
-                            )} */}
+
                                     {activeComponent === "trips" && (
-                                        <NullTrips />
+                                        <UserTripsDetails userId={user._id} />
                                     )}
                                     {activeComponent === "review" && (
                                         <UserReviewsDeatils

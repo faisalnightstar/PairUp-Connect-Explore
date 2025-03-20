@@ -1,21 +1,35 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { MdStarRate, MdLocationOn, MdCalendarMonth } from "react-icons/md";
 import { FaCamera, FaRoute, FaUserCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchRating } from "../../features/ratingSlice";
 
 const YourProfile = ({ user, joinedDate, isCurrentUser }) => {
+    console.log("user: ", user);
+    const dispatch = useDispatch();
+    const { userRatings, loading, error } = useSelector(
+        (state) => state.ratings
+    );
+    console.log(`userRatings in YourProfile : ${userRatings}`);
+
+    useEffect(() => {
+        if (user._id) {
+            dispatch(fetchRating(user._id));
+        }
+    }, [dispatch, user._id]);
     return (
         <>
-            <div className="flex flex-row flex-wrap mt-6 space-x-20 space-y-2 sm:space-x-1 md:space-x-2 ">
-                <div className="flex flex-row relative w-24 h-24 rounded-full items-left justify-left">
+            <div className="flex flex-row flex-wrap mt-6 lg:space-x-20 space-y-2 space-x-1 md:space-x-2 ">
+                <div className="flex flex-row relative w-20 h-20 md:w-24 md:h-24 rounded-full items-left justify-left">
                     {user?.avatar ? (
                         <img
-                            className="w-24 h-24 rounded-full"
+                            className="w-20 h-20 md:w-24 md:h-24 rounded-full"
                             src={user.avatar}
                             alt="User Avatar"
                         />
                     ) : (
-                        <FaUserCircle className="absolute rounded-full w-24 h-24 text-paragraph-color" />
+                        <FaUserCircle className="absolute rounded-full w-20 h-20 md:w-24 md:h-24 text-paragraph-color" />
                     )}
                     {isCurrentUser && (
                         <Link
@@ -57,7 +71,8 @@ const YourProfile = ({ user, joinedDate, isCurrentUser }) => {
                     <div className="flex flex-row space-x-8">
                         <p className="font-normal flex items-center  flex-row font-roboto  text-profile-details space-x-1/2 md:space-x-2 sm:space-x-1 text-sm">
                             <MdStarRate fill="#FACC15" className="h-6 w-6" />
-                            4.9 <span> (124 reviews)</span>
+                            {userRatings?.averageRating}{" "}
+                            <span> ({userRatings?.totalCount} reviews)</span>
                         </p>
                         <p className="flex flex-row  font-normal items-center font-roboto   space-x-2 text-sm sm:space-x-0 md:space-x-2">
                             <FaRoute fill="#F79489" />

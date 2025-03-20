@@ -24,6 +24,9 @@ import {
     ViewOtherUserDetails,
 } from "./pages/index.js";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+//import LocationProvider from "./components/LocationProvider2.jsx";
+import { LocationProvider } from "./components/LocationProvider.jsx";
+import { meetingPoint } from "./pages/viewDeatails/trip/DetailSection.jsx";
 
 const router = createBrowserRouter([
     {
@@ -60,7 +63,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "/view-post-details/:tripId",
+                path: "view-post-details/:tripId",
                 element: <ViewPostDetails />,
             },
             {
@@ -111,7 +114,9 @@ createRoot(document.getElementById("root")).render(
     <StrictMode>
         <Provider store={store}>
             {/* <PersistGate loading={null} persistor={persistor}> */}
-            <RouterProvider router={router} />
+            <LocationProvider>
+                <RouterProvider router={router} />
+            </LocationProvider>
             {/* </PersistGate> */}
         </Provider>
     </StrictMode>

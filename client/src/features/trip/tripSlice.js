@@ -6,6 +6,7 @@ const initialState = {
     status: false,
     trip: [],
     selectedTrip: null,
+    tripHistories: [],
     loading: false,
     error: null,
 };
@@ -27,10 +28,16 @@ export const createTrip = createAsyncThunk(
 
 export const allTrips = createAsyncThunk(
     "trip/allTrips",
-    async (_, { rejectWithValue }) => {
+    async ({ lat, lng, maxDistance }, { rejectWithValue }) => {
         try {
+            console.log(
+                ` In allTrips thunk lat: ${lat} lng: ${lng} maxDistance: ${maxDistance}`
+            );
             const response = await axios.get(
-                `${envConfig.BaseUrl}/users/trips/all-trips`
+                `${envConfig.BaseUrl}/users/trips/all-trips`,
+                {
+                    params: { lat, lng, maxDistance },
+                }
             );
             return response.data.data;
         } catch (error) {
@@ -55,19 +62,10 @@ export const singleTrip = createAsyncThunk(
 
 export const joinTrip = createAsyncThunk(
     "trip/joinTrip",
-    async (tripId, { rejectWithValue, getState }) => {
+    async (tripId, { rejectWithValue }) => {
         try {
-            const { user } = getState().auth;
-            console.log("User in joinTrip thunk: ", user);
-
-            if (!user) {
-                console.log("User not authenticated");
-                return rejectWithValue({ message: "User not authenticated" });
-            }
-
             const response = await axios.post(
-                `${envConfig.BaseUrl}/users/trips/join-trip/${tripId}`,
-                { userId: user._id }
+                `${envConfig.BaseUrl}/users/trips/join-trip/${tripId}`
             );
 
             return response.data.data;
@@ -76,6 +74,37 @@ export const joinTrip = createAsyncThunk(
             return rejectWithValue(
                 error.response ? error.response.data : error.message
             );
+        }
+    }
+);
+
+export const leaveTrip = createAsyncThunk(
+    "trip/leaveTrip",
+    async (tripId, { rejectWithValue }) => {
+        try {
+            const response = await axios.post(
+                `${envConfig.BaseUrl}/users/trips/leave-trip/${tripId}`
+            );
+            return response.data.data;
+        } catch (error) {
+            console.error("Error in leaveTrip thunk:", error);
+            return rejectWithValue(
+                error.response ? error.response.data : error.message
+            );
+        }
+    }
+);
+
+export const tripsHistory = createAsyncThunk(
+    "trip/tripsHistory",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(
+                `${envConfig.BaseUrl}/users/trips/trips-history/${tripId}`
+            );
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
         }
     }
 );
@@ -135,6 +164,18 @@ const tripSlice = createSlice({
                 state.selectedTrip = action.payload;
             })
             .addCase(joinTrip.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Something went wrong";
+            })
+            .addCase(tripsHistory.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(tripsHistory.fulfilled, (state, action) => {
+                state.loading = false;
+                state.tripHistories = action.payload;
+            })
+            .addCase(tripsHistory.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || "Something went wrong";
             });

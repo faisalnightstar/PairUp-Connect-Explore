@@ -1,187 +1,78 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaCalendarAlt, FaMapMarkerAlt, FaUsers } from "react-icons/fa";
+import NullTrips from "./NullTrips";
+import { useDispatch, useSelector } from "react-redux";
+import { tripsHistory } from "../../features/trip/tripSlice.js";
+import { fetchUserTripHistory } from "../../features/trip/tripHistorySlice.js";
+import { useNavigate } from "react-router-dom";
 
-const UserTripsDetails = () => {
+const UserTripsDetails = ({ userId }) => {
+    console.log("userId in UserTrips history: ", userId);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { trips, loading, error, message } = useSelector(
+        (state) => state.tripHistory
+    );
+    console.log("tripHistories: ", trips, loading, error, message);
+
+    useEffect(() => {
+        if (userId) {
+            dispatch(fetchUserTripHistory({ userId }));
+        }
+    }, [dispatch, userId]);
+
+    if (loading) return <p>Loading...</p>;
+    if (!trips || trips.length === 0) return <NullTrips />;
+    if (error) return <p>Error: {error}</p>;
+
     return (
-        <main className="flex-grow mt-10 max-w-8xl mx-auto sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">
-                Total Trips!
+        <main className="flex-grow mt-1 max-w-8xl mx-auto ">
+            <h1 className="text-xl font-bold text-gray-900 mb-4">
+                Total Trips ({trips.length})
             </h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                 {/* Trip Card 1 */}
-                <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md w-64 transition-shadow">
-                    <div className="flex items-start justify-between mb-4">
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                Goa Beach Paradise
-                            </h3>
-                            <p className="text-gray-600 flex items-center">
-                                <FaMapMarkerAlt className="mr-2 text-custom" />
-                                Goa, India
-                            </p>
+                {trips &&
+                    trips.map((trip) => (
+                        <div
+                            onClick={() =>
+                                navigate(`/view-post-details/${trip._id}`)
+                            }
+                            key={trip._id}
+                            className=" flex flex-col cursor-pointer flex-wrap content-start shadow-sm  p-4 rounded-sm"
+                        >
+                            <div className="flex flex-col items-start justify-between w-full">
+                                <div className="flex items-center justify-between  w-full">
+                                    <span
+                                        className={`text-xs px-2 capitalize rounded-full ${trip.role === "organized" ? "text-blue-600 bg-blue-100" : "bg-purple-100 text-purple-600"} `}
+                                    >
+                                        {trip.role}
+                                    </span>
+                                    <span
+                                        className={`text-xs ${trip.status === "cancelled" ? "bg-red-100 text-red-500" : trip.status === "completed" ? "bg-gray-100 text-gray-500" : "bg-green-100 text-green-600"} flex items-center capitalize px-2 rounded-full `}
+                                    >
+                                        {trip.status}
+                                    </span>
+                                </div>
+                                <h4 className=" font-medium text-sm leading-6 font-roboto mt-4">
+                                    Goa Paradise
+                                </h4>
+                                <p className="text-xs text-gray-600 flex items-center font-light">
+                                    {new Date(trip.startDate).toDateString()}
+                                </p>
+                            </div>
+                            {/* <div className="flex flex-row items-center space-x-2 mt-2">
+                                <img
+                                    className="w-6 h-6 rounded-full bg-amber-200"
+                                    src=""
+                                    alt=""
+                                />
+                                
+                                
+                            </div> */}
                         </div>
-                    </div>
-                    <img
-                        src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/33/fc/f0/goa.jpg?w=2400&h=1000&s=1"
-                        alt="Goa Trip"
-                        className="w-fit h-48 object-cover rounded-lg mb-4"
-                    />
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 flex items-center">
-                                <FaCalendarAlt className="mr-2 text-custom" />
-                                Dec 30, 2024
-                            </span>
-                            <span className="text-gray-600 flex items-center">
-                                <FaUsers className="mr-2 text-custom" />2 Joined
-                            </span>
-                        </div>
-                        {/* Join Trip Button */}
-                        <p className="rounded-md bg-paragraph-color text-center text-white">
-                            Cancelled
-                        </p>
-                    </div>
-                </div>
-
-                {/* Trip Card 2 */}
-                <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md w-64 transition-shadow">
-                    <div className="flex items-start justify-between mb-4">
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                Goa Beach Paradise
-                            </h3>
-                            <p className="text-gray-600 flex items-center">
-                                <FaMapMarkerAlt className="mr-2 text-custom" />
-                                Goa, India
-                            </p>
-                        </div>
-                    </div>
-                    <img
-                        src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/33/fc/f0/goa.jpg?w=2400&h=1000&s=1"
-                        alt="Goa Trip"
-                        className="w-fit h-48 object-cover rounded-lg mb-4"
-                    />
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 flex items-center">
-                                <FaCalendarAlt className="mr-2 text-custom" />
-                                Dec 30, 2024
-                            </span>
-                            <span className="text-gray-600 flex items-center">
-                                <FaUsers className="mr-2 text-custom" />2 Joined
-                            </span>
-                        </div>
-                        {/* Join Trip Button */}
-                        <p className="rounded-md bg-paragraph-color text-center text-white">
-                            Completed
-                        </p>
-                    </div>
-                </div>
-
-                {/* Trip Card 3 */}
-                <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md w-64 transition-shadow">
-                    <div className="flex items-start justify-between mb-4">
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                Goa Beach Paradise
-                            </h3>
-                            <p className="text-gray-600 flex items-center">
-                                <FaMapMarkerAlt className="mr-2 text-custom" />
-                                Goa, India
-                            </p>
-                        </div>
-                    </div>
-                    <img
-                        src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/33/fc/f0/goa.jpg?w=2400&h=1000&s=1"
-                        alt="Goa Trip"
-                        className="w-fit h-48 object-cover rounded-lg mb-4"
-                    />
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 flex items-center">
-                                <FaCalendarAlt className="mr-2 text-custom" />
-                                Dec 30, 2024
-                            </span>
-                            <span className="text-gray-600 flex items-center">
-                                <FaUsers className="mr-2 text-custom" />2 Joined
-                            </span>
-                        </div>
-                        {/* Join Trip Button */}
-                        <p className="rounded-md bg-paragraph-color text-center text-white">
-                            Cancelled
-                        </p>
-                    </div>
-                </div>
-
-                {/* Trip Card 4 */}
-                <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md w-64 transition-shadow">
-                    <div className="flex items-start justify-between mb-4">
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                Goa Beach Paradise
-                            </h3>
-                            <p className="text-gray-600 flex items-center">
-                                <FaMapMarkerAlt className="mr-2 text-custom" />
-                                Goa, India
-                            </p>
-                        </div>
-                    </div>
-                    <img
-                        src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/33/fc/f0/goa.jpg?w=2400&h=1000&s=1"
-                        alt="Goa Trip"
-                        className="w-fit h-48 object-cover rounded-lg mb-4"
-                    />
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 flex items-center">
-                                <FaCalendarAlt className="mr-2 text-custom" />
-                                Dec 30, 2024
-                            </span>
-                            <span className="text-gray-600 flex items-center">
-                                <FaUsers className="mr-2 text-custom" />2 Joined
-                            </span>
-                        </div>
-                        {/* Join Trip Button */}
-                        <p className="rounded-md bg-paragraph-color text-center text-white">
-                            Completed
-                        </p>
-                    </div>
-                </div>
-                {/* Trip Card 5 */}
-                <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md w-64 transition-shadow">
-                    <div className="flex items-start justify-between mb-4">
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                Goa Beach Paradise
-                            </h3>
-                            <p className="text-gray-600 flex items-center">
-                                <FaMapMarkerAlt className="mr-2 text-custom" />
-                                Goa, India
-                            </p>
-                        </div>
-                    </div>
-                    <img
-                        src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/33/fc/f0/goa.jpg?w=2400&h=1000&s=1"
-                        alt="Goa Trip"
-                        className="w-fit h-48 object-cover rounded-lg mb-4"
-                    />
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 flex items-center">
-                                <FaCalendarAlt className="mr-2 text-custom" />
-                                Dec 30, 2024
-                            </span>
-                            <span className="text-gray-600 flex items-center">
-                                <FaUsers className="mr-2 text-custom" />2 Joined
-                            </span>
-                        </div>
-                        {/* Join Trip Button */}
-                        <p className="rounded-md bg-paragraph-color text-center text-red-500">
-                            Cancelled
-                        </p>
-                    </div>
-                </div>
+                    ))}
             </div>
         </main>
     );

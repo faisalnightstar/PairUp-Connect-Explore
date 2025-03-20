@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { FaCalendarAlt, FaUsers } from "react-icons/fa";
+import { FaCalendarAlt, FaUsers, FaEdit } from "react-icons/fa";
 
 import { Loader } from "../../../components";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,24 +11,29 @@ import JoiningAndOrganizerSection from "./JoiningAndOrganizerSection";
 const ViewPostDetails = () => {
     const { tripId } = useParams();
     const dispatch = useDispatch();
+    const [isOrganizer, setIsOrganizer] = useState(false);
 
-    let tripDetail = useSelector((state) =>
-        state.trip.trip.find((t) => t._id === tripId)
-    );
+    //console.log("tripId for getting trip page details: ", tripId);
+
+    // let tripDetail = useSelector((state) =>
+    //     state.trip.trip.find((t) => t._id === tripId)
+    // );
 
     const { selectedTrip, loading, error } = useSelector((state) => state.trip);
+    const { user } = useSelector((state) => state.auth);
+
+    //console.log("selectedTrip: ", selectedTrip);
 
     useEffect(() => {
-        if (tripDetail == undefined) {
-            dispatch(singleTrip(tripId));
-        }
+        dispatch(singleTrip(tripId));
     }, [tripId]);
 
-    if (tripDetail == undefined) {
-        tripDetail = selectedTrip;
-    }
+    console.log(
+        "(selectedTrip.organizer?.username === user?.username): ",
+        selectedTrip?.organizer?.username === user?.username
+    );
 
-    if (loading || !tripDetail) return <Loader />;
+    if (loading || !selectedTrip) return <Loader />;
     if (error) {
         return (
             <p className="text-red-500 mt-36">Something went wrong: {error}</p>
@@ -37,6 +42,7 @@ const ViewPostDetails = () => {
     // Rendering the trip details
 
     const userLocale = navigator.language || "en-US"; // Auto-detect currentUser locale
+    //console.log(new Date(selectedTrip.startDate));
 
     const tripStartDate = (isoDate) => {
         if (!isoDate) return "N/A";
@@ -58,49 +64,52 @@ const ViewPostDetails = () => {
 
     return (
         <>
-            <div className="min-w-screen mx-auto mt-16 mb-20 overflow-hidden ">
+            <div className="min-w-screen mx-auto mt-16 mb-20 overflow-hidden isolate">
                 {/* Header Image */}
                 <div className="relative">
                     <img
-                        src={tripDetail.coverImage}
-                        alt={tripDetail.destination}
-                        className="w-full h-[32rem] overflow-hidden p-0 object-cover"
+                        src={selectedTrip.coverImage}
+                        alt={selectedTrip.destination}
+                        className="w-full mix-blend-multipl md:h-[32rem] lg:h-full overflow-hidden p-0 object-cover"
                     />
-                    <h1 className="absolute bottom-4 left-6 text-4xl bg-blur-sm text-button-color font-bold">
-                        {tripDetail.destination}
+                    <h1 className="absolute  drop-shadow-md outline-white outline-1 underline decoration-solid rounded-md mix-blend-plus-darker px-4 capitalize bottom-4 left-6 md:text-4xl bg-blur-sm text-white font-bold">
+                        {selectedTrip.destination}
                     </h1>
+                    {isOrganizer && (
+                        <FaEdit
+                            className={`absolute top-4 right-4 text-lg md:text-3xl text-white cursor-pointer drop-shadow-md decoration-solid rounded-md mix-blend-plus-darker `}
+                        />
+                    )}
                 </div>
 
                 {/* Trip Info */}
-                <div className="flex justify-between items-cente max-w-8xl mx-auto shadow-lg bg-white  sm:mt-1 p-12 sm:p-1">
-                    <div className="flex items-center text-gray-600">
+                <div className="flex justify-between bg-white items-cente max-w-8xl mx-auto shadow-lg   sm:mt-1 px-2 p-1 md:py-4">
+                    <div className="flex items-center text-gray-600 text-xs">
                         <FaCalendarAlt className="mr-2" />{" "}
-                        {tripStartDate(tripDetail.startDate)} -{" "}
-                        {tripEndDate(tripDetail.endDate)}
-                        <span className="flex flex-row justify-center items-center ml-2">
+                        {tripStartDate(selectedTrip.startDate)} -{" "}
+                        {tripEndDate(selectedTrip.endDate)}
+                        <span className="flex flex-row justify-center items-center text-xs md:text-sm ml-2">
                             <FaUsers className="mr-1" />{" "}
-                            {tripDetail.numberOfPeople} seats left
+                            {selectedTrip.numberOfPeople} seats left
                         </span>
                     </div>
 
-                    {isJoiningOpen(tripDetail.startDate) ? (
-                        <span className="px-3 py-1 text-xs text-green-600 bg-green-100 rounded-full">
-                            Joining Open
-                        </span>
-                    ) : (
-                        <span className="px-3 py-1 text-xs text-white bg-gray-400 rounded-full">
-                            Joining Closed
-                        </span>
-                    )}
+                    <span
+                        className={`px-2 md:px-3 md:py-1 text-xs  rounded-full ${isJoiningOpen(selectedTrip.startDate) ? "bg-green-100 text-green-600" : "bg-gray-400 text-white"}`}
+                    >
+                        {isJoiningOpen(selectedTrip.startDate)
+                            ? "Joining Open"
+                            : " Joining Closed"}
+                    </span>
                 </div>
                 {/* Main Content */}
-                <div className="flex flex-col justify-center md:flex-row  sm:gap-1 gap-6 px-2 md:px-2">
+                <div className="flex flex-col justify-around md:flex-row  sm:gap-1 gap-6 px-2 md:px-2">
                     {/* Trip Details Section */}
-                    <DetailSection tripDetail={tripDetail} />
+                    <DetailSection tripDetail={selectedTrip} />
                     {/* Organizer and Booking Section */}
                     <JoiningAndOrganizerSection
-                        tripDetail={tripDetail}
-                        tripEndDate={tripEndDate(tripDetail.endDate)}
+                        tripDetail={selectedTrip}
+                        tripEndDate={tripEndDate(selectedTrip.endDate)}
                     />
                 </div>
             </div>

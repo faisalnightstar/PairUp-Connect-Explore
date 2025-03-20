@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { FaExclamationCircle, FaRupeeSign } from "react-icons/fa";
+import { FaExclamationCircle, FaRupeeSign, FaStar } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { joinTrip } from "../../../features/trip/tripSlice";
+import { fetchRating } from "../../../features/ratingSlice";
 
-const JoiningAndOrganizerSection = ({ tripDetail, tripEndDate }) => {
+const JoiningAndOrganizerSection = ({ tripEndDate }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { selectedTrip } = useSelector((state) => state.trip);
     const [isJoined, setIsJoined] = useState(false);
     const [isOrganizer, setIsOrganizer] = useState(false);
+    let organizerId = selectedTrip.organizer._id;
+
+    //console.log("selectedTrip of organizer: ", selectedTrip.organizer._id);
 
     //console.log("isJoined: ", isJoined);
 
@@ -18,11 +23,14 @@ const JoiningAndOrganizerSection = ({ tripDetail, tripEndDate }) => {
 
     const { user } = useSelector((state) => state.auth);
 
+    //console.log("userRatings in JoiningAndOrganizerSection: ", userRatings);
+
     //console.log("user in JoiningAndOrganizerSection: ", user);
 
     const handleJoinTrip = async () => {
         try {
-            const response = dispatch(joinTrip(tripDetail._id));
+            const response = dispatch(joinTrip(selectedTrip._id));
+
             //console.log("response: ", response);
         } catch (error) {
             if (error.response?.status === 401) {
@@ -35,22 +43,26 @@ const JoiningAndOrganizerSection = ({ tripDetail, tripEndDate }) => {
         }
     };
     useEffect(() => {
-        if (tripDetail) {
+        if (selectedTrip && user) {
             setIsJoined(
-                tripDetail.participants.some(
-                    (user) => user.username === user?.username
+                selectedTrip.participants?.some(
+                    (participant) => participant?.username === user?.username
                 )
             );
-            setIsOrganizer(tripDetail.organizer.username === user.username);
+            setIsOrganizer(selectedTrip.organizer?.username === user?.username);
         }
-    });
+    }, [selectedTrip, user, handleJoinTrip, setIsJoined, setIsOrganizer]);
     // console.log(
-    //     "tripDetail.participants.username: ",
-    //     tripDetail.participants.some((user) => user.username === user.username),
-    //     "tripDetail.organizer._id === user._id",
-    //     tripDetail.organizer.username === user.username,
+    //     "tripDetails",
+    //     selectedTrip,
+    //     "selectedTrip.participants.username: ",
+    //     selectedTrip.participants.some(
+    //         (participant) => participant?.username === user?.username
+    //     ),
+    //     "selectedTrip.organizer._id === user._id",
+    //     selectedTrip.organizer?.username === user?.username,
     //     "user.name: ",
-    //     user.username
+    //     user?.username
     // );
     return (
         <div className="mt-1  md:mt-1 grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2  gap-6 sm:gap-1">
@@ -59,37 +71,41 @@ const JoiningAndOrganizerSection = ({ tripDetail, tripEndDate }) => {
                 <div className="flex flex-grow flex-row space-x-2 w-min">
                     <img
                         className="w-8 h-8 lg:w-12 lg:h-12 rounded-full cursor-pointer"
-                        src={tripDetail.organizer.avatar}
-                        alt={tripDetail.organizer.name}
+                        src={selectedTrip.organizer.avatar}
+                        alt={selectedTrip.organizer.name}
                         onClick={() =>
-                            handleUserClick(tripDetail.organizer.username)
+                            handleUserClick(selectedTrip.organizer?.username)
                         }
                     />
                     <div className="flex flex-col  justify-center items-center pr-4">
                         <h2
                             className="flex flex-col font-roboto text-sm font-md w-min  cursor-pointer"
                             onClick={() =>
-                                handleUserClick(tripDetail.organizer.username)
+                                handleUserClick(
+                                    selectedTrip.organizer?.username
+                                )
                             }
                         >
-                            {tripDetail.organizer.name}
+                            {selectedTrip.organizer.name}
                             <p className="mt-0">
                                 {" "}
                                 <span
                                     className="text-xs font-md tracking-widest font-roboto bg-btn-bg-color rounded-full px-2 py-0.5 text-red-500 cursor-pointer"
                                     onClick={() =>
                                         handleUserClick(
-                                            tripDetail.organizer.username
+                                            selectedTrip.organizer?.username
                                         )
                                     }
                                 >
-                                    @{tripDetail.organizer.username}
+                                    @{selectedTrip.organizer?.username}
                                 </span>{" "}
                             </p>
                         </h2>
 
-                        <p className="text-yellow-500 text-xs">
-                            ⭐ 4.8 (124 reviews)
+                        <p className="text-button-color text-xs flex flex-row mt-1 items-center">
+                            <FaStar className="mr-1" />{" "}
+                            {selectedTrip.organizerAverageRating} (
+                            {selectedTrip.organizerTotalRatings} reviews)
                         </p>
                     </div>
                 </div>
@@ -104,12 +120,12 @@ const JoiningAndOrganizerSection = ({ tripDetail, tripEndDate }) => {
                 <h3 className="flex flex-row items-center text-xs ">
                     <span className="mr-1 font-semibold">Budget:</span>
                     <FaRupeeSign />
-                    {tripDetail.budget}/person
+                    {selectedTrip.budget}/person
                 </h3>
                 <p className="text-gray-600 text-xs">
                     <span className="mr-1 font-semibold"> Seats Left: </span>{" "}
-                    {tripDetail.participants?.length} of{" "}
-                    {tripDetail.numberOfPeople}
+                    {selectedTrip.participants?.length} of{" "}
+                    {selectedTrip.numberOfPeople}
                 </p>
                 <p className="flex text-gray-600 text-xs">
                     <span className=" mr-1 font-semibold">
@@ -121,7 +137,9 @@ const JoiningAndOrganizerSection = ({ tripDetail, tripEndDate }) => {
                 {isOrganizer ? (
                     <button
                         className={`mt-3 w-full py-1 rounded-full ${"bg-red-500 text-white cursor-pointer hover:bg-red-600 active:bg-white"}`}
-                        onClick={() => navigate(`/trip/edit/${tripDetail._id}`)}
+                        onClick={() =>
+                            navigate(`/trip/edit/${selectedTrip._id}`)
+                        }
                     >
                         Edit Trip
                     </button>
@@ -138,38 +156,6 @@ const JoiningAndOrganizerSection = ({ tripDetail, tripEndDate }) => {
                         {isJoined ? "Already Joined" : "Join Trip"}
                     </button>
                 )}
-
-                {/* Participants Section */}
-                <div className="mt-6  w-full  rounded-lg">
-                    <h3 className="text-xs text-center font-md mb-2">
-                        Participants
-                    </h3>
-                    <div className="flex flex-col flex-wrap gap-4">
-                        {tripDetail.participants?.map((participant, index) => (
-                            <div
-                                key={index}
-                                className="flex items-center space-x-3"
-                            >
-                                <img
-                                    className="w-10 h-10 rounded-full cursor-pointer"
-                                    src={participant?.avatar}
-                                    alt={participant?.name}
-                                    onClick={() =>
-                                        handleUserClick(participant.username)
-                                    }
-                                />
-                                <p
-                                    className="text-sm font-medium cursor-pointer"
-                                    onClick={() =>
-                                        handleUserClick(participant?.username)
-                                    }
-                                >
-                                    {participant?.name}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
                 <p className="flex flex-row items-center space-x-2 text-gray-500 text-sm mt-1 md:mt-3">
                     <img className="mr-2" src="SecureConnection.svg" alt="" />
                     <FaExclamationCircle className="mr-2 text-red-500" /> Don't

@@ -15,6 +15,7 @@ import {
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { getAllReviews } from "../controllers/review.controller.js";
 
 const router = Router();
 
@@ -37,7 +38,7 @@ router.route("/login").post(loginUser);
 //secured routes
 router.route("/logout").post(verifyJWT, logoutUser);
 
-router.route("/refresh-token").post(refreshAccessToken);
+router.route("/refresh-token").post(refreshAccessToken); // localhost:8001/api/v1/users/refresh-token
 
 router.route("/change-password").post(verifyJWT, changeCurrentPassword);
 
@@ -58,6 +59,8 @@ router
     .get(verifyJWT, getUserChannelProfile);
 
 router.route("/find/find-user/:username").get(findUserByUsername);
+
+router.route("/all-reviews").get(verifyJWT, getAllReviews);
 
 router.route("/trip-history").get(verifyJWT, getTripHistory);
 
