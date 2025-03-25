@@ -26,10 +26,13 @@ app.use(cookieParser());
 import userRouter from "./routes/user.routes.js";
 import tripRouter from "./routes/trip.routes.js";
 import reviewRouter from "./routes/review.routes.js";
+import { errorMiddleware } from "./utils/ApiError.js";
 
 // routes declaration
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/users/trips", tripRouter);
 app.use("/api/v1/users", reviewRouter);
 
+//this middleware should be end.
+app.use(errorMiddleware);
 export { app };

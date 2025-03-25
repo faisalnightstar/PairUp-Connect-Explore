@@ -102,6 +102,14 @@ const userSchema = new Schema(
         refreshToken: {
             type: String,
         },
+        accountVerified: {
+            type: Boolean,
+            default: false,
+        },
+        verificationCode: Number,
+        verificationCodeExpiry: Date,
+        resetPasswordToken: String,
+        resetPasswordExpire: Date,
     },
     {
         timestamps: true,
