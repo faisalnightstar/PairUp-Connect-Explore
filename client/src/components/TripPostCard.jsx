@@ -52,8 +52,8 @@ const TripPostCard = ({ tripItem }) => {
         <div className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md w-96 h-96 transition-shadow">
             <img
                 src={
-                    tripItem.coverImage
-                        ? tripItem.coverImage
+                    tripItem?.coverImage
+                        ? tripItem?.coverImage
                         : "https://res.cloudinary.com/pairup-connect/image/upload/f_auto,q_auto/No_image_available_afsl0y"
                 }
                 alt="cover image"
@@ -63,8 +63,8 @@ const TripPostCard = ({ tripItem }) => {
                 <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600 flex items-center">
                         <FaCalendarAlt className="mr-2 text-custom" />
-                        {tripStartDate(tripItem.startDate)} -{" "}
-                        {tripEndDate(tripItem.endDate)}
+                        {tripStartDate(tripItem?.startDate)} -{" "}
+                        {tripEndDate(tripItem?.endDate)}
                     </span>
                     <span className="text-gray-600 flex items-center">
                         <FaUsers className="mr-2 text-custom" />
@@ -75,7 +75,7 @@ const TripPostCard = ({ tripItem }) => {
                     <div>
                         <h3 className="text-lg flex flex-row items-center font-semibold text-header-color mb-1">
                             <FaMapMarkerAlt className="mr-2  text-md center text-header-color" />
-                            {tripItem.destination}
+                            {tripItem?.destination}
                         </h3>
                         <p className="text-gray-600 items-center text-xs w-64 truncate">
                             {tripItem?.description}
@@ -87,7 +87,7 @@ const TripPostCard = ({ tripItem }) => {
                 </div>
                 <button
                     className="rounded-full w-full bg-button-color font-roboto text-white py-2 px-4 hover:bg-button-color/90 hover:cursor-pointer"
-                    onClick={() => handleUserClick(tripItem._id)}
+                    onClick={() => handleUserClick(tripItem?._id)}
                 >
                     View Details
                 </button>
