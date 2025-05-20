@@ -18,7 +18,7 @@ function ReviewForm({ revieweeId }) {
     //console.log("user: ", user);
 
     const onSubmit = (reviewData) => {
-        if (user._id == revieweeId) return alert("You cannot review yourself");
+        if (user?._id == revieweeId) return alert("You cannot review yourself");
         //console.log("reviewData: ", reviewData);
         const response = dispatch(createReview({ reviewData, revieweeId }));
         console.log("response: ", response);

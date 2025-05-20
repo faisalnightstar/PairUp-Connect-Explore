@@ -22,7 +22,7 @@ const UserReviewsDeatils = ({ userDetail, joinedDate }) => {
     //console.log("fetchReviews: ", fetchedReviews);
 
     useEffect(() => {
-        dispatch(fetchReviews(userDetail._id));
+        dispatch(fetchReviews(userDetail?._id));
     }, [dispatch, navigate]);
 
     if (loading) return <Loader />;
@@ -49,14 +49,14 @@ const UserReviewsDeatils = ({ userDetail, joinedDate }) => {
                     <h4 className="text-2xl font-bold text-gray-900 mb-4">
                         Write a Review
                     </h4>
-                    <ReviewForm revieweeId={userDetail._id} />
+                    <ReviewForm revieweeId={userDetail?._id} />
                 </div>
                 {/* total reviews */}
                 <div className="flex flex-col rounded-2xl flex-1/2 w-full md:w-1/2 space-y-4 md:space-y-0 md:space-x-4  md:p-8">
                     <h4 className="text-2xl font-bold text-gray-900 ">
                         User Ratings
                     </h4>
-                    <Ratings revieweeId={userDetail._id} />
+                    <Ratings revieweeId={userDetail?._id} />
                 </div>
             </div>
 
