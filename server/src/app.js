@@ -29,6 +29,9 @@ import reviewRouter from "./routes/review.routes.js";
 import { errorMiddleware } from "./utils/ApiError.js";
 
 // routes declaration
+app.get("/", (req, res) => {
+    res.send("Hello World!");
+});
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/users/trips", tripRouter);
 app.use("/api/v1/users", reviewRouter);
