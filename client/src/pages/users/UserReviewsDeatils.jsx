@@ -65,7 +65,7 @@ const UserReviewsDeatils = ({ userDetail, joinedDate }) => {
                 User Reviews ({fetchedReviews?.length})
             </h5>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Review Card 1 */}
+                {/* Review Card Section */}
                 {fetchedReviews &&
                     fetchedReviews.map((review) => (
                         <ReviewCard

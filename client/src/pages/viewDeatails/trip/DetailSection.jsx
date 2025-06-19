@@ -127,7 +127,7 @@ const DetailSection = () => {
                 </h3>
 
                 <div className="flex flex-row flex-wrap gap-4 mt-2">
-                    {selectedTrip.participants?.map((participant) => (
+                    {selectedTrip?.participants?.map((participant) => (
                         <div
                             key={participant?.username}
                             className="flex items-center space-x-1"

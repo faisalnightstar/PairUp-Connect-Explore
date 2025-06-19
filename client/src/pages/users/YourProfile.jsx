@@ -25,7 +25,7 @@ const YourProfile = ({ user, joinedDate, isCurrentUser }) => {
                     {user?.avatar ? (
                         <img
                             className="w-20 h-20 md:w-24 md:h-24 rounded-full"
-                            src={user.avatar}
+                            src={user?.avatar}
                             alt="User Avatar"
                         />
                     ) : (
@@ -46,7 +46,7 @@ const YourProfile = ({ user, joinedDate, isCurrentUser }) => {
                         <p className="mt-">
                             {" "}
                             <span className="text-[0.5rem] tracking-widest font-poppins bg-btn-bg-color rounded-full px-2 py-0.5 text-red-500">
-                                @{user.username}
+                                @{user?.username}
                             </span>{" "}
                         </p>
                     </h2>
@@ -60,7 +60,7 @@ const YourProfile = ({ user, joinedDate, isCurrentUser }) => {
                         </p>
                     </div>
                     <p className="flex flex-row  items-center font-normal font-roboto   text-profile-details text-sm">
-                        <MdLocationOn /> Delhi, India
+                        <MdLocationOn /> {user?.address}
                     </p>
                     <p className="flex flex-row items-center font-normal font-roboto   text-profile-details text-sm">
                         <MdCalendarMonth /> Member since

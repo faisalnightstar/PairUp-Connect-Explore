@@ -72,8 +72,8 @@ const ViewPostDetails = () => {
                         alt={selectedTrip.destination}
                         className="w-full mix-blend-multipl md:h-[32rem] lg:h-full overflow-hidden p-0 object-cover"
                     />
-                    <h1 className="absolute  drop-shadow-md outline-white outline-1 underline decoration-solid rounded-md mix-blend-plus-darker px-4 capitalize bottom-4 left-6 md:text-4xl bg-blur-sm text-white font-bold">
-                        {selectedTrip.destination}
+                    <h1 className="absolute drop-shadow-2xl shadow-black outline-white outline-1 underline decoration-solid rounded-md mix-blend-plus-darker px-4 capitalize bottom-4 left-6 md:text-4xl bg-blur-sm text-white font-bold">
+                        {selectedTrip?.destination}
                     </h1>
                     {isOrganizer && (
                         <FaEdit

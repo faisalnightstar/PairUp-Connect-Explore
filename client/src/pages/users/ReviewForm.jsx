@@ -86,7 +86,7 @@ function ReviewForm({ revieweeId }) {
                 />
                 {errors.rating && (
                     <p className="text-red-500 text-xs mt-1">
-                        {errors.rating.message}
+                        {errors?.rating?.message}
                     </p>
                 )}
             </div>
@@ -106,7 +106,7 @@ function ReviewForm({ revieweeId }) {
                 />
                 {errors.comment && (
                     <p className="text-red-500 text-xs mt-1">
-                        {errors.comment.message}
+                        {errors?.comment?.message}
                     </p>
                 )}
             </div>

@@ -44,7 +44,7 @@ const TripHistoryCard = ({ trip, userId }) => {
                     </span>
                     <span className="text-gray-600 flex items-center">
                         <FaUsers className="mr-2 text-custom" />
-                        {trip?.participants.length} Joined
+                        {trip?.participants?.length} Joined
                     </span>
                 </div>
 

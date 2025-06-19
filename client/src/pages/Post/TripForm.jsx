@@ -92,7 +92,7 @@ const TripForm = () => {
         }
 
         // Append latitude and longitude
-        // Ensure these values are available, otherwise handle appropriately
+        // Ensure these values are available, otherwise handle appropriately.
         if (lat && lng) {
             formData.append("lat", lat);
             formData.append("lng", lng);
