@@ -7,7 +7,7 @@ import { SplashScreen } from "./pages/index.js";
 
 function App() {
     const [showSplash, setShowSplash] = useState(true);
-    const dispatch = useDispatch();
+    const dispatch = useDispatch(); // Get the dispatch function
 
     useEffect(() => {
         const splashShown = localStorage.getItem("splashScreenShown");
