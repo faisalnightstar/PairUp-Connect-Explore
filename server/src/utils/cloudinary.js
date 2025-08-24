@@ -1,7 +1,9 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import path from "path";
 
-// Configuration
+// Only allow file operations within this safe upload folder (adjust as necessary)
+const SAFE_UPLOADS_ROOT = path.resolve(process.cwd(), "uploads"); // e.g., /app/uploads
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -12,9 +14,16 @@ const uploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) return null; // Return null if no file path is provided
 
-        // Upload an fie to Cloudinary
+        // Ensure file path is under safe folder
+        const resolvedPath = path.resolve(localFilePath);
+        if (!resolvedPath.startsWith(SAFE_UPLOADS_ROOT + path.sep)) {
+            console.error(`Refusing to operate on file outside safe upload folder: ${resolvedPath}`);
+            return null;
+        }
+
+        // Upload an file to Cloudinary
         const uploadResult = await cloudinary.uploader
-            .upload(localFilePath, {
+            .upload(resolvedPath, {
                 resource_type: "auto", // The type of file. 'auto' will automatically detect the type of file
                 crop: "auto",
                 gravity: "auto",
@@ -26,10 +35,14 @@ const uploadOnCloudinary = async (localFilePath) => {
             });
 
         //console.log(`Files is uploaded successfully: ${uploadResult.url}`);
-        fs.unlinkSync(localFilePath); //Delete the locally saved file if it successfully uploaded
+        fs.unlinkSync(resolvedPath); //Delete the locally saved file if it successfully uploaded
         return uploadResult;
     } catch (error) {
-        fs.unlinkSync(localFilePath); // Delete the locally saved file if it fails to upload
+        // Only attempt to delete if actually inside the safe folder
+        const resolvedPath = path.resolve(localFilePath);
+        if (resolvedPath.startsWith(SAFE_UPLOADS_ROOT + path.sep)) {
+            fs.unlinkSync(resolvedPath);
+        }
         return null;
     }
 };
@@ -38,9 +51,15 @@ const tripUploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) return null; // Return null if no file path is provided
 
-        // Upload an fie to Cloudinary
+        const resolvedPath = path.resolve(localFilePath);
+        if (!resolvedPath.startsWith(SAFE_UPLOADS_ROOT + path.sep)) {
+            console.error(`Refusing to operate on file outside safe upload folder: ${resolvedPath}`);
+            return null;
+        }
+
+        // Upload an file to Cloudinary
         const uploadResult = await cloudinary.uploader
-            .upload(localFilePath, {
+            .upload(resolvedPath, {
                 resource_type: "auto", // The type of file. 'auto' will automatically detect the type of file
                 crop: "auto",
                 gravity: "auto",
@@ -52,10 +71,13 @@ const tripUploadOnCloudinary = async (localFilePath) => {
             });
 
         //console.log(`Files is uploaded successfully: ${uploadResult.url}`);
-        fs.unlinkSync(localFilePath); //Delete the locally saved file if it successfully uploaded
+        fs.unlinkSync(resolvedPath); //Delete the locally saved file if it successfully uploaded
         return uploadResult;
     } catch (error) {
-        fs.unlinkSync(localFilePath); // Delete the locally saved file if it fails to upload
+        const resolvedPath = path.resolve(localFilePath);
+        if (resolvedPath.startsWith(SAFE_UPLOADS_ROOT + path.sep)) {
+            fs.unlinkSync(resolvedPath);
+        }
         return null;
     }
 };
