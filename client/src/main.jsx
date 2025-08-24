@@ -26,7 +26,6 @@ import {
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 //import LocationProvider from "./components/LocationProvider2.jsx";
 import { LocationProvider } from "./components/LocationProvider.jsx";
-import { meetingPoint } from "./pages/viewDeatails/trip/DetailSection.jsx";
 
 const router = createBrowserRouter([
     {
